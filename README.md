@@ -46,8 +46,8 @@ $ npm run start:prod
 # unit tests
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
+# integration tests
+$ npm run test:integration
 
 # test coverage
 $ npm run test:cov
