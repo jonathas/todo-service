@@ -39,6 +39,6 @@ export class DatabaseConfigService implements TypeOrmOptionsFactory {
   private getEnvironment(): Environments {
     return Object.values(Environments).includes(process.env.NODE_ENV as Environments)
       ? (process.env.NODE_ENV as Environments)
-      : Environments.DEV;
+      : Environments.DEVELOPMENT;
   }
 }

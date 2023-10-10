@@ -1,6 +1,6 @@
 # To Do management service
 
-An API in GraphQL for managing To Dos
+A GraphQL API for managing To Dos
 
 ## Features
 
