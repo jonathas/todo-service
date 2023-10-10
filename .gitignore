@@ -398,4 +398,7 @@ Temporary Items
 dist
 .webpack
 .serverless/**/*.zip
-resources/db/data
+resources/db
+
+# GraphQL Schema (Auto-generated when the project runs)
+schema.gql
