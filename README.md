@@ -11,7 +11,7 @@ A GraphQL API for managing To Dos
 - Possibility to update tasks
   - Possibility to mark tasks as done
 - Integration with Microsoft To Do. Tasks are kept in sync between our service and the third-party integration
-  - Tasks created in the third-party integration are always be created in our service
+  - Tasks created in the third-party integration are always created in our service
   - The status of tasks is always in sync between our service and the integration
 
 ## Tech
@@ -77,7 +77,6 @@ erDiagram
       updated_at timestamp
     }
     tasks_lists {
-      id int
       task_id int
       list_id int
     }

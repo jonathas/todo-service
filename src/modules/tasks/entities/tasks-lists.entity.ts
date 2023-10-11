@@ -1,12 +1,11 @@
 import {
   BeforeInsert,
   BeforeUpdate,
-  Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn
 } from 'typeorm';
 import { Lists } from '../../lists/lists.entity';
@@ -14,13 +13,10 @@ import { Tasks } from './tasks.entity';
 
 @Entity('tasks_lists')
 export class TasksLists {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
-  public id: number;
-
-  @Column('int', { name: 'task_id', unsigned: true })
+  @PrimaryColumn('int', { name: 'task_id', unsigned: true })
   public taskId: number;
 
-  @Column('int', { name: 'list_id' })
+  @PrimaryColumn('int', { name: 'list_id' })
   public listId: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

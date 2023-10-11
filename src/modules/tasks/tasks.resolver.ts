@@ -1,24 +1,34 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { TasksService } from './tasks.service';
 import { PaginatedTasks, Task } from './dto/task.dto';
-import { TaskInput } from './dto/tasks.input';
+import { CreateTaskInput, TaskInput, UpdateTaskInput } from './dto/tasks.input';
 
 @Resolver(() => Task)
 export class TasksResolver {
   public constructor(private readonly tasksService: TasksService) {}
 
-  // TODO: Add a query to get a task by ID
-
-  // TODO: Add a query to get all tasks
-
-  // TODO: Add a mutation to create a task
-
-  // TODO: Add a mutation to update a task
-
-  // TODO: Add a mutation to delete a task
+  @Query(() => Task, { name: 'task' })
+  public findOne(@Args('id') id: number) {
+    return this.tasksService.findOne(id);
+  }
 
   @Query(() => PaginatedTasks, { name: 'tasks' })
   public findAll(@Args('input') input: TaskInput): Promise<PaginatedTasks> {
     return this.tasksService.findAll(input);
+  }
+
+  @Mutation(() => Task)
+  public createTask(@Args('input') input: CreateTaskInput) {
+    return this.tasksService.create(input);
+  }
+
+  @Mutation(() => Task)
+  public updateTask(@Args('input') input: UpdateTaskInput) {
+    return this.tasksService.update(input);
+  }
+
+  @Mutation(() => Task)
+  public deleteTask(@Args('id') id: number) {
+    return this.tasksService.delete(id);
   }
 }

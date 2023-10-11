@@ -5,6 +5,26 @@ import { IsOptional } from 'class-validator';
 import { OrderByTasksColumns } from '../tasks.enums';
 
 @InputType()
+export class CreateTaskInput {
+  @Field(() => String)
+  public name: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  public description?: string;
+}
+
+@InputType()
+export class UpdateTaskInput extends CreateTaskInput {
+  @Field(() => Number)
+  public id: number;
+
+  @Field(() => Boolean, { defaultValue: false })
+  @IsOptional()
+  public isDone: boolean;
+}
+
+@InputType()
 export class TaskInput extends PaginatedInput {
   @Field(() => Boolean, { defaultValue: false })
   @IsOptional()

@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Tasks } from './entities/tasks.entity';
-import { PaginatedTasks } from './dto/task.dto';
+import { PaginatedTasks, Task } from './dto/task.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TaskInput } from './dto/tasks.input';
+import { CreateTaskInput, TaskInput, UpdateTaskInput } from './dto/tasks.input';
 
 @Injectable()
 export class TasksService {
@@ -25,20 +25,29 @@ export class TasksService {
     return { data, totalCount };
   }
 
-  public findOne(id: number): Promise<Tasks> {
-    return this.tasksRepository.findOne({ where: { id } });
+  public async findOne(id: number): Promise<Task> {
+    const task = await this.tasksRepository.findOne({ where: { id } });
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+    return task;
   }
 
-  public create(task: Tasks): Promise<Tasks> {
+  public create(input: CreateTaskInput): Promise<Tasks> {
+    const task = this.tasksRepository.create(input);
     return this.tasksRepository.save(task);
   }
 
-  public async update(id: number, task: Tasks): Promise<Tasks> {
-    await this.tasksRepository.update(id, task);
-    return this.tasksRepository.findOne({ where: { id } });
+  public async update(input: UpdateTaskInput): Promise<Tasks> {
+    const task = await this.findOne(input.id);
+    task.updatedAt = new Date();
+
+    return this.tasksRepository.save(Object.assign(task, input));
   }
 
-  public async delete(id: string): Promise<void> {
-    await this.tasksRepository.delete(id);
+  public async delete(id: number): Promise<Task> {
+    const task = await this.findOne(id);
+    await this.tasksRepository.delete(task);
+    return task;
   }
 }
