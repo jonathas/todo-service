@@ -9,4 +9,8 @@ export class ListsService {
     @InjectRepository(Lists)
     private readonly listsRepository: Repository<Lists>
   ) {}
+
+  public findAll(): Promise<Lists[]> {
+    return this.listsRepository.find();
+  }
 }
