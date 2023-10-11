@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { TasksService } from './tasks.service';
 import { PaginatedTasks, Task } from './dto/task.dto';
 import { CreateTaskInput, TaskInput, UpdateTaskInput } from './dto/tasks.input';
@@ -28,7 +28,7 @@ export class TasksResolver {
   }
 
   @Mutation(() => Task)
-  public deleteTask(@Args('id') id: number) {
+  public deleteTask(@Args('id', { type: () => Int }) id: number) {
     return this.tasksService.delete(id);
   }
 }

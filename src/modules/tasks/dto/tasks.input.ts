@@ -19,6 +19,10 @@ export class UpdateTaskInput extends CreateTaskInput {
   @Field(() => Number)
   public id: number;
 
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  public name: string;
+
   @Field(() => Boolean, { defaultValue: false })
   @IsOptional()
   public isDone: boolean;

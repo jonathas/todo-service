@@ -1,0 +1,147 @@
+{
+	"info": {
+		"_postman_id": "ed7719ec-27fe-47cd-a10c-a1c4944fa091",
+		"name": "To Do service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "836543"
+	},
+	"item": [
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Get all tasks which are not done",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "{\n  tasks(input: {isDone: false}) {\n    totalCount\n    data {\n      id\n      name\n      description\n      isDone\n      createdAt\n      updatedAt\n    }\n  }\n}\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get task by id",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "{\n  task(id: 1) {\n    id\n    name\n    description\n    isDone\n    createdAt\n    updatedAt\n  }\n}\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation createTask($input: CreateTaskInput!) {\n  createTask(input: $input) {\n    id\n    name\n    description\n    isDone\n    createdAt\n    updatedAt\n  }\n}\n",
+								"variables": "{\n\t\"input\": {\n    \"name\": \"Sample task\",\n    \"description\": \"This is a description\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation updateTask($input: UpdateTaskInput!) {\n\tupdateTask(input: $input) {\n    id\n    name\n    description\n    isDone\n    createdAt\n    updatedAt\n  }\n}\n",
+								"variables": "{\n\t\"input\": {\n    \"id\": 1,\n    \"isDone\": true\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation deleteTask($id: Int!) {\n  deleteTask(id: $id) {\n    id\n  }\n}\n",
+								"variables": "{\"id\": 2}"
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "apiUrl",
+			"value": "http://localhost:3000/graphql",
+			"type": "string"
+		}
+	]
+}
