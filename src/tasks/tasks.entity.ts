@@ -5,12 +5,12 @@ export class Tasks {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   public id: number;
 
-  @Column('text', { name: 'name', nullable: false })
+  @Column('varchar', { name: 'name', nullable: false, length: 255 })
   public name: string;
 
-  @Column('text', { name: 'description', nullable: true })
+  @Column('varchar', { name: 'description', nullable: true, length: 255 })
   public description: string | null;
 
-  @Column('int', { name: 'status' })
+  @Column('boolean', { name: 'status' })
   public status: boolean;
 }

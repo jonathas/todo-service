@@ -19,6 +19,7 @@ A GraphQL API for managing To Dos
 - PostgreSQL
 - TypeScript
 - NestJS
+- Express
 - GraphQL
 
 ## Installation
@@ -51,4 +52,28 @@ $ npm run test:integration
 
 # test coverage
 $ npm run test:cov
+```
+
+## Database
+
+```mermaid
+erDiagram
+    tasks ||--o{ tasks_lists : relates
+    lists ||--o{ tasks_lists : relates
+
+    tasks {
+        id int
+        name varchar(255)
+        description varchar(255)
+        status boolean
+    }
+    lists {
+      id int
+      name varchar(255)
+      description varchar(255)
+    }
+    tasks_lists {
+      tasks_id int
+      lists_id int
+    }
 ```
