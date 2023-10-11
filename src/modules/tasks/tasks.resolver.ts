@@ -1,8 +1,9 @@
-import { Query, Resolver } from '@nestjs/graphql';
+import { Args, Query, Resolver } from '@nestjs/graphql';
 import { TasksService } from './tasks.service';
-import { PaginatedTasks } from './dto/task.dto';
+import { PaginatedTasks, Task } from './dto/task.dto';
+import { TaskInput } from './dto/tasks.input';
 
-@Resolver(() => TasksService)
+@Resolver(() => Task)
 export class TasksResolver {
   public constructor(private readonly tasksService: TasksService) {}
 
@@ -17,7 +18,7 @@ export class TasksResolver {
   // TODO: Add a mutation to delete a task
 
   @Query(() => PaginatedTasks, { name: 'tasks' })
-  public findAll(): Promise<PaginatedTasks> {
-    return this.tasksService.findAll();
+  public findAll(@Args('input') input: TaskInput): Promise<PaginatedTasks> {
+    return this.tasksService.findAll(input);
   }
 }
