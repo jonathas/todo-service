@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { PaginatedInput } from '../../../shared/pagination.types';
 import { Order } from '../../../shared/enums';
 import { IsOptional } from 'class-validator';
@@ -12,6 +12,10 @@ export class CreateTaskInput {
   @Field(() => String, { nullable: true })
   @IsOptional()
   public description?: string;
+
+  @Field(() => [Int], { nullable: true })
+  @IsOptional()
+  public listsIds?: number[];
 }
 
 @InputType()

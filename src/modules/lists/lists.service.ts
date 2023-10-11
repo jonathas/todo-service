@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Lists } from './lists.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TasksLists } from '../tasks/entities/tasks-lists.entity';
+import { List, PaginatedLists } from './dto/list.dto';
+import { CreateListInput, ListInput, UpdateListInput } from './dto/lists.input';
 
 @Injectable()
 export class ListsService {
@@ -13,25 +15,49 @@ export class ListsService {
     private readonly tasksListsRepository: Repository<TasksLists>
   ) {}
 
-  public findAll(): Promise<Lists[]> {
-    return this.listsRepository.find();
+  public async findAll(input: ListInput): Promise<PaginatedLists> {
+    const { order, sortBy, limit, offset } = input;
+
+    const [data, totalCount] = await this.listsRepository.findAndCount({
+      order: { [sortBy]: order },
+      take: limit,
+      skip: offset
+    });
+
+    return { data, totalCount };
   }
 
-  public async findAllByTaskId(taskId: number): Promise<Lists[]> {
-    const taskLists = await this.tasksListsRepository
-      .createQueryBuilder('tasksLists')
-      .select([
-        'tasksLists.listId',
-        'list.id',
-        'list.name',
-        'list.description',
-        'list.createdAt',
-        'list.updatedAt'
-      ])
-      .leftJoin('tasksLists.list', 'list')
-      .where('tasksLists.taskId = :taskId', { taskId })
-      .getMany();
+  public async findOne(id: number): Promise<List> {
+    const list = await this.listsRepository.findOne({ where: { id } });
+    if (!list) {
+      throw new NotFoundException('List not found');
+    }
+    return list;
+  }
 
-    return taskLists.map((taskList) => taskList.list);
+  public findAllByTaskId(taskId: number): Promise<Lists[]> {
+    return this.listsRepository
+      .createQueryBuilder('lists')
+      .innerJoin('lists.taskLists', 'taskLists')
+      .innerJoin('taskLists.task', 'tasks')
+      .where('tasks.id = :taskId', { taskId })
+      .getMany();
+  }
+
+  public create(input: CreateListInput): Promise<Lists> {
+    return this.listsRepository.save(this.listsRepository.create(input));
+  }
+
+  public async update(input: UpdateListInput): Promise<Lists> {
+    const list = await this.findOne(input.id);
+    list.updatedAt = new Date();
+
+    return this.listsRepository.save(Object.assign(list, input));
+  }
+
+  public async delete(id: number): Promise<List> {
+    const list = await this.findOne(id);
+    await this.listsRepository.delete(list);
+    return list;
   }
 }

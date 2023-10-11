@@ -1,18 +1,18 @@
 import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { TasksService } from './tasks.service';
-import { PaginatedTasks, Task } from './dto/task.dto';
+import { PaginatedTasks, Task, TaskDetails } from './dto/task.dto';
 import { CreateTaskInput, TaskInput, UpdateTaskInput } from './dto/tasks.input';
 import { List } from '../lists/dto/list.dto';
 import { ListsService } from '../lists/lists.service';
 
-@Resolver(() => Task)
+@Resolver(() => TaskDetails)
 export class TasksResolver {
   public constructor(
     private readonly tasksService: TasksService,
     private readonly listsService: ListsService
   ) {}
 
-  @Query(() => Task, { name: 'task' })
+  @Query(() => TaskDetails, { name: 'task' })
   public findOne(@Args('id', { type: () => Int }) id: number) {
     return this.tasksService.findOne(id);
   }
