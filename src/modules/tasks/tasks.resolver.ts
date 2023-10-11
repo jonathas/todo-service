@@ -8,7 +8,7 @@ export class TasksResolver {
   public constructor(private readonly tasksService: TasksService) {}
 
   @Query(() => Task, { name: 'task' })
-  public findOne(@Args('id') id: number) {
+  public findOne(@Args('id', { type: () => Int }) id: number) {
     return this.tasksService.findOne(id);
   }
 

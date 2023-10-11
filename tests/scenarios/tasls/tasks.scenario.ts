@@ -109,4 +109,28 @@ export default class TasksScenario {
         expect(body.data.tasks.data[0].name).toBe('Sample task (updated)');
       });
   }
+
+  public async getTaskById() {
+    const id = await this.createTasks();
+
+    await AppTestHelper.gqlRequest(this.app)
+      .send({ query: TasksScenarioHelper.getOneTaskQuery(), variables: { id } })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.data.task).toBeDefined();
+        expect(body.data.task.name).toBe('Sample task 1');
+      });
+  }
+
+  public async deleteTask() {
+    const id = await this.createTasks();
+
+    await AppTestHelper.gqlRequest(this.app)
+      .send({ query: TasksScenarioHelper.getDeleteTaskMutation(), variables: { id } })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.data.deleteTask).toBeDefined();
+        expect(body.data.deleteTask.name).toBe('Sample task 1');
+      });
+  }
 }

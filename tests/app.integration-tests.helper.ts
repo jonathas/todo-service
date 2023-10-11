@@ -10,7 +10,7 @@ export class AppTestHelper {
 
   public static async truncateTable(app: NestExpressApplication, table: string) {
     const dataSource = app.get(DataSource);
-    await dataSource.query(`TRUNCATE TABLE "${table}" CASCADE;`);
+    await dataSource.query(`TRUNCATE TABLE "${table}" RESTART IDENTITY CASCADE;`);
   }
 
   public static async truncateAllTables(app: NestExpressApplication) {

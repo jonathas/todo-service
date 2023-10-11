@@ -42,13 +42,13 @@ describe('# App (integration tests)', () => {
 
     it('should list all tasks which are done', () => tasksScenario.listDoneTasks());
 
-    /*it.skip('should list all tasks with their lists', () => {});
+    //it.skip('should list all tasks with their lists', () => {});
 
-    it.skip('should retrieve a task by id', () => {});
+    it('should get a task by id', () => tasksScenario.getTaskById());
 
-    it.skip('should retrieve a task by id with the lists it belongs to', () => {});
+    //it.skip('should retrieve a task by id with the lists it belongs to', () => {});
 
-    it.skip('should delete a task', () => {});*/
+    it('should delete a task', () => tasksScenario.deleteTask());
   });
 
   /*describe.skip('# Lists', () => {

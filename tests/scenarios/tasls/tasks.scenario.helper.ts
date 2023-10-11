@@ -42,4 +42,24 @@ export default class TasksScenarioHelper {
     }
       `;
   }
+
+  public static getOneTaskQuery() {
+    return `
+    query task($id: Int!) {
+      task(id: $id) {
+        ${TasksScenarioHelper.getTaskObject()}
+      }
+    }
+      `;
+  }
+
+  public static getDeleteTaskMutation() {
+    return `
+    mutation deleteTask($id: Int!) {
+      deleteTask(id: $id) {
+        ${TasksScenarioHelper.getTaskObject()}
+      }
+    }
+      `;
+  }
 }
