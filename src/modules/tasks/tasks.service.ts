@@ -13,9 +13,10 @@ export class TasksService {
   ) {}
 
   public async findAll(input: TaskInput): Promise<PaginatedTasks> {
-    const { order, sortBy, limit, offset } = input;
+    const { isDone, order, sortBy, limit, offset } = input;
 
     const [data, totalCount] = await this.tasksRepository.findAndCount({
+      where: { isDone },
       order: { [sortBy]: order },
       take: limit,
       skip: offset

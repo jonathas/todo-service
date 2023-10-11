@@ -19,7 +19,7 @@ export class Task {
   public description: string;
 
   @Field(() => Boolean)
-  public status: boolean;
+  public isDone: boolean;
 
   @Field(() => Date)
   public createdAt: Date;

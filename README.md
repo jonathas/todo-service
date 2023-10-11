@@ -65,14 +65,19 @@ erDiagram
         id int
         name varchar(255)
         description varchar(255)
-        status boolean
+        is_done boolean
+        created_at timestamp
+        updated_at timestamp
     }
     lists {
       id int
       name varchar(255)
       description varchar(255)
+      created_at timestamp
+      updated_at timestamp
     }
     tasks_lists {
+      id int
       task_id int
       list_id int
     }

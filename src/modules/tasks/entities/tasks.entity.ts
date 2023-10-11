@@ -21,8 +21,8 @@ export class Tasks {
   @Column('varchar', { name: 'description', nullable: true, length: 255 })
   public description: string | null;
 
-  @Column('boolean', { name: 'status' })
-  public status: boolean;
+  @Column('boolean', { name: 'is_done' })
+  public isDone: boolean;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   public createdAt: Date;

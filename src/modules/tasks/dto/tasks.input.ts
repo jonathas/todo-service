@@ -6,6 +6,10 @@ import { OrderByTasksColumns } from '../tasks.enums';
 
 @InputType()
 export class TaskInput extends PaginatedInput {
+  @Field(() => Boolean, { defaultValue: false })
+  @IsOptional()
+  public isDone: boolean;
+
   @Field(() => Order, { nullable: true, defaultValue: Order.ASCENDING })
   @IsOptional()
   public order: Order;
