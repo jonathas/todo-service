@@ -73,7 +73,7 @@ erDiagram
       description varchar(255)
     }
     tasks_lists {
-      tasks_id int
-      lists_id int
+      task_id int
+      list_id int
     }
 ```

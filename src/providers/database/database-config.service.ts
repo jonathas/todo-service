@@ -2,8 +2,6 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { DatabaseConfig } from '../../config/database.config';
-import { Environments } from '../../shared/enums';
-import * as fs from 'fs';
 
 @Injectable()
 export class DatabaseConfigService implements TypeOrmOptionsFactory {
@@ -13,7 +11,7 @@ export class DatabaseConfigService implements TypeOrmOptionsFactory {
     const databaseSetting: TypeOrmModuleOptions = {
       type: 'postgres',
       ...this.config.get<DatabaseConfig>('database'),
-      entities: [this.getEntitiesPath()]
+      entities: [__dirname + '/../../../**/*.entity{.ts,.js}']
     };
 
     if (databaseSetting.synchronize) {
@@ -21,24 +19,5 @@ export class DatabaseConfigService implements TypeOrmOptionsFactory {
     }
 
     return databaseSetting;
-  }
-
-  private getEntitiesPath(): string {
-    const env = this.getEnvironment();
-    const paths = {
-      ts: 'src/**/*.entity.ts',
-      js: 'dist/**/*.entity.js'
-    };
-
-    if (env === Environments.TEST && fs.existsSync('src')) {
-      return paths.ts;
-    }
-    return paths.js;
-  }
-
-  private getEnvironment(): Environments {
-    return Object.values(Environments).includes(process.env.NODE_ENV as Environments)
-      ? (process.env.NODE_ENV as Environments)
-      : Environments.DEVELOPMENT;
   }
 }

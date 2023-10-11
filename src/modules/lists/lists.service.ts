@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Tasks } from './tasks.entity';
+import { Lists } from './lists.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class TasksService {
+export class ListsService {
   public constructor(
-    @InjectRepository(Tasks)
-    private readonly tasksRepository: Repository<Tasks>
+    @InjectRepository(Lists)
+    private readonly listsRepository: Repository<Lists>
   ) {}
 }
