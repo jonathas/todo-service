@@ -1,5 +1,6 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { PaginatedOutput } from '../../../shared/pagination.types';
+import { List } from '../../lists/dto/list.dto';
 
 @ObjectType()
 export class PaginatedTasks extends PaginatedOutput<Task> {
@@ -26,4 +27,7 @@ export class Task {
 
   @Field(() => Date)
   public updatedAt: Date;
+
+  @Field(() => [List], { nullable: true, defaultValue: [] })
+  public lists?: List[];
 }

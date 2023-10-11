@@ -40,13 +40,13 @@ export class TasksLists {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE'
   })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'task_id', referencedColumnName: 'id' }])
   public task: Tasks;
 
-  @ManyToOne(() => Lists, (lists) => lists.createdAt, {
+  @ManyToOne(() => Lists, (lists) => lists.id, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE'
   })
-  @JoinColumn([{ name: 'skill_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'list_id', referencedColumnName: 'id' }])
   public list: Lists;
 }

@@ -7,6 +7,7 @@ export interface DatabaseConfig {
   port: number;
   username: string;
   password: string;
+  logQueries: boolean;
 }
 
 export default registerAs(
@@ -17,6 +18,7 @@ export default registerAs(
     host: process.env.DATABASE_HOST || 'localhost',
     port: parseInt(process.env.DATABASE_PORT) || 5432,
     username: process.env.DATABASE_USER || 'root',
-    password: process.env.DATABASE_PASSWORD || 'root'
+    password: process.env.DATABASE_PASSWORD || 'root',
+    logQueries: process.env.DATABASE_LOG_QUERIES === 'true'
   })
 );
