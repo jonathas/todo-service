@@ -1,22 +1,31 @@
 import {
   BeforeInsert,
   BeforeUpdate,
+  Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
-import { Lists } from '../../lists/lists.entity';
-import { Tasks } from './tasks.entity';
+import { Lists } from '../lists/lists.entity';
 
-@Entity('tasks_lists')
-export class TasksLists {
-  @PrimaryColumn('int', { name: 'task_id', unsigned: true })
-  public taskId: number;
+@Entity()
+export class Tasks {
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  public id: number;
 
-  @PrimaryColumn('int', { name: 'list_id' })
+  @Column('varchar', { name: 'name', nullable: false, length: 255 })
+  public name: string;
+
+  @Column('varchar', { name: 'description', nullable: true, length: 255 })
+  public description: string | null;
+
+  @Column('boolean', { name: 'is_done', nullable: false, default: false })
+  public isDone: boolean;
+
+  @Column('int', { name: 'list_id', nullable: true })
   public listId: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -36,14 +45,7 @@ export class TasksLists {
     this.updatedAt = new Date();
   }
 
-  @ManyToOne(() => Tasks, (tasks) => tasks.id, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
-  })
-  @JoinColumn([{ name: 'task_id', referencedColumnName: 'id' }])
-  public task: Tasks;
-
-  @ManyToOne(() => Lists, (lists) => lists.id, {
+  @OneToOne(() => Lists, (lists) => lists.tasks, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE'
   })

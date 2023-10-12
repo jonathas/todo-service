@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
-import { TasksLists } from '../tasks/entities/tasks-lists.entity';
+import { Tasks } from '../tasks/tasks.entity';
 
 @Entity()
 export class Lists {
@@ -38,6 +38,6 @@ export class Lists {
     this.updatedAt = new Date();
   }
 
-  @OneToMany(() => TasksLists, (tasksLists) => tasksLists.list)
-  public taskLists: TasksLists[];
+  @OneToMany(() => Tasks, (tasks) => tasks.list)
+  public tasks: Tasks[];
 }

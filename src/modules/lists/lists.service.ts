@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Lists } from './lists.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TasksLists } from '../tasks/entities/tasks-lists.entity';
 import { List, PaginatedLists } from './dto/list.dto';
 import { CreateListInput, ListInput, UpdateListInput } from './dto/lists.input';
 
@@ -10,9 +9,7 @@ import { CreateListInput, ListInput, UpdateListInput } from './dto/lists.input';
 export class ListsService {
   public constructor(
     @InjectRepository(Lists)
-    private readonly listsRepository: Repository<Lists>,
-    @InjectRepository(TasksLists)
-    private readonly tasksListsRepository: Repository<TasksLists>
+    private readonly listsRepository: Repository<Lists>
   ) {}
 
   public async findAll(input: ListInput): Promise<PaginatedLists> {
@@ -33,15 +30,6 @@ export class ListsService {
       throw new NotFoundException('List not found');
     }
     return list;
-  }
-
-  public findAllByTaskId(taskId: number): Promise<Lists[]> {
-    return this.listsRepository
-      .createQueryBuilder('lists')
-      .innerJoin('lists.taskLists', 'taskLists')
-      .innerJoin('taskLists.task', 'tasks')
-      .where('tasks.id = :taskId', { taskId })
-      .getMany();
   }
 
   public create(input: CreateListInput): Promise<Lists> {

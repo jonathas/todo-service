@@ -13,9 +13,9 @@ export class CreateTaskInput {
   @IsOptional()
   public description?: string;
 
-  @Field(() => [Int], { nullable: true })
+  @Field(() => Int, { nullable: true })
   @IsOptional()
-  public listsIds?: number[];
+  public listId?: number;
 }
 
 @InputType()

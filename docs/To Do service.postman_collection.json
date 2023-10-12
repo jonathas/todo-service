@@ -17,7 +17,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "{\n  tasks(input: {isDone: false}) {\n    totalCount\n    data {\n      id\n      name\n      description\n      isDone\n      createdAt\n      updatedAt\n    }\n  }\n}\n",
+								"query": "{\n  tasks(input: {isDone: false}) {\n    totalCount\n    data {\n      id\n      name\n      description\n      isDone\n      createdAt\n      updatedAt\n      list {\n          id\n          name\n      }\n    }\n  }\n}\n",
 								"variables": ""
 							}
 						},
@@ -38,7 +38,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "{\n  task(id: 1) {\n    id\n    name\n    description\n    isDone\n    createdAt\n    updatedAt\n  }\n}\n",
+								"query": "{\n  task(id: 1) {\n    id\n    name\n    description\n    isDone\n    createdAt\n    updatedAt\n    list {\n      id\n      name\n      description\n    }\n  }\n}\n",
 								"variables": ""
 							}
 						},
@@ -60,7 +60,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation createTask($input: CreateTaskInput!) {\n  createTask(input: $input) {\n    id\n    name\n    description\n    isDone\n    createdAt\n    updatedAt\n  }\n}\n",
-								"variables": "{\n\t\"input\": {\n    \"name\": \"Sample task\",\n    \"description\": \"This is a description\"\n  }\n}"
+								"variables": "{\n\t\"input\": {\n    \"name\": \"Sample task\",\n    \"description\": \"This is a description\",\n    \"listId\": 1\n  }\n}"
 							}
 						},
 						"url": {
@@ -103,6 +103,116 @@
 							"graphql": {
 								"query": "mutation deleteTask($id: Int!) {\n  deleteTask(id: $id) {\n    id\n  }\n}\n",
 								"variables": "{\"id\": 2}"
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lists",
+			"item": [
+				{
+					"name": "Get all lists",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "{\n  lists(input: {}) {\n    totalCount\n    data {\n      id\n      name\n      description\n      createdAt\n      updatedAt\n    }\n  }\n}\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get list by id",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "{\n  list(id: 1) {\n    id\n    name\n    description\n    createdAt\n    updatedAt\n    tasks {\n      id\n      name\n      description\n      isDone\n    }\n  }\n}\n",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create list",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation createList($input: CreateListInput!) {\n  createList(input: $input) {\n    id\n    name\n    description\n    createdAt\n    updatedAt\n  }\n}\n",
+								"variables": "{\n\t\"input\": {\n    \"name\": \"MyList\",\n    \"description\": \"This is an important list\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update list",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation updateList($input: UpdateListInput!) {\n  updateList(input: $input) {\n    id\n    name\n    description\n    createdAt\n    updatedAt\n  }\n}\n",
+								"variables": "{\n\t\"input\": {\n        \"id\": 1,\n        \"name\": \"MyNewList\",\n        \"description\": \"This list has been renamed\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{apiUrl}}",
+							"host": [
+								"{{apiUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete list",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation deleteList($id: Int!) {\n  deleteList(id: $id) {\n    id\n  }\n}\n",
+								"variables": "{\"id\": 1}"
 							}
 						},
 						"url": {

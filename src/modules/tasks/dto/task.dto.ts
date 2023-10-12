@@ -27,10 +27,7 @@ export class Task {
 
   @Field(() => Date)
   public updatedAt: Date;
-}
 
-@ObjectType()
-export class TaskDetails extends Task {
-  @Field(() => [List], { nullable: true, defaultValue: [] })
-  public lists?: List[];
+  @Field(() => List, { nullable: true })
+  public list?: List;
 }

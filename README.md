@@ -58,8 +58,7 @@ $ npm run test:cov
 
 ```mermaid
 erDiagram
-    tasks ||--o{ tasks_lists : relates
-    lists ||--o{ tasks_lists : relates
+    tasks ||--o| lists : relates
 
     tasks {
         id int
@@ -68,6 +67,7 @@ erDiagram
         is_done boolean
         created_at timestamp
         updated_at timestamp
+        list_id int
     }
     lists {
       id int
@@ -75,9 +75,5 @@ erDiagram
       description varchar(255)
       created_at timestamp
       updated_at timestamp
-    }
-    tasks_lists {
-      task_id int
-      list_id int
     }
 ```
