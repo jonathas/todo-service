@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 
@@ -16,6 +17,12 @@ async function bootstrap() {
           frameSrc: [`'self'`, 'sandbox.embed.apollographql.com']
         }
       }
+    })
+  );
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true
     })
   );
 
