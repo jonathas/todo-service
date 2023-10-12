@@ -48,11 +48,8 @@ export class ListsService {
 
   public async delete(id: number): Promise<List> {
     const list = await this.findOne(id);
-    const tasks = await this.tasksRepository.find({
-      where: { listId: list.id }
-    });
 
-    await this.tasksRepository.remove(tasks);
+    await this.tasksRepository.delete({ listId: list.id });
     await this.listsRepository.delete(list);
 
     return list;
