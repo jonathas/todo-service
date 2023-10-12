@@ -3,8 +3,12 @@ import { AppModule } from '../src/app.module';
 import TasksScenario from './scenarios/tasls/tasks.scenario';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppTestHelper } from './app.integration-tests.helper';
+import ListsScenario from './scenarios/lists/lists.scenario';
 
 describe('# App (integration tests)', () => {
+  // Get rid of excessive logging
+  process.env.LOG_LEVEL = 'fatal';
+
   let app: NestExpressApplication;
 
   beforeAll(async () => {
@@ -38,34 +42,34 @@ describe('# App (integration tests)', () => {
     it('should update a task (name, description, and set it to done)', () =>
       tasksScenario.updateTask());
 
-    it('should list all tasks which are not done', () => tasksScenario.listNotDoneTasks());
+    it('should get all tasks which are not done', () => tasksScenario.getNotDoneTasks());
 
-    it('should list all tasks which are done', () => tasksScenario.listDoneTasks());
-
-    //it.skip('should list all tasks with their lists', () => {});
+    it('should get all tasks which are done', () => tasksScenario.getDoneTasks());
 
     it('should get a task by id', () => tasksScenario.getTaskById());
-
-    //it.skip('should retrieve a task by id with the lists it belongs to', () => {});
 
     it('should delete a task', () => tasksScenario.deleteTask());
   });
 
-  /*describe.skip('# Lists', () => {
-    let tasksScenario: TasksScenario;
+  describe('# Lists', () => {
+    let listsScenario: ListsScenario;
 
     beforeAll(() => {
-      tasksScenario = new TasksScenario(app);
+      listsScenario = new ListsScenario(app);
     });
 
-    it('should create lists', () => {});
+    beforeEach(async () => {
+      await AppTestHelper.truncateTable(app, 'lists');
+    });
 
-    it('should update a list (name, description)', () => {});
+    it('should create lists', () => listsScenario.createLists());
 
-    it('should list all lists', () => {});
+    it('should update a list (name, description)', () => listsScenario.updateList());
 
-    it('should retrieve a list by id and its tasks', () => {});
+    it('should get all lists', () => listsScenario.getLists());
 
-    it('should delete a list', () => {});
-  });*/
+    it('should retrieve a list by id and its tasks', () => listsScenario.getListById());
+
+    it('should delete a list and tasks associated with it', () => listsScenario.deleteList());
+  });
 });

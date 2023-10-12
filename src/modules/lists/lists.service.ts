@@ -4,12 +4,15 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { List, PaginatedLists } from './dto/list.dto';
 import { CreateListInput, ListInput, UpdateListInput } from './dto/lists.input';
+import { Tasks } from '../tasks/tasks.entity';
 
 @Injectable()
 export class ListsService {
   public constructor(
     @InjectRepository(Lists)
-    private readonly listsRepository: Repository<Lists>
+    private readonly listsRepository: Repository<Lists>,
+    @InjectRepository(Tasks)
+    private readonly tasksRepository: Repository<Tasks>
   ) {}
 
   public async findAll(input: ListInput): Promise<PaginatedLists> {
@@ -45,7 +48,13 @@ export class ListsService {
 
   public async delete(id: number): Promise<List> {
     const list = await this.findOne(id);
+    const tasks = await this.tasksRepository.find({
+      where: { listId: list.id }
+    });
+
+    await this.tasksRepository.remove(tasks);
     await this.listsRepository.delete(list);
+
     return list;
   }
 }

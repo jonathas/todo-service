@@ -1,6 +1,7 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppTestHelper } from '../../app.integration-tests.helper';
 import TasksScenarioHelper from './tasks.scenario.helper';
+import ListsScenario from '../lists/lists.scenario';
 
 export default class TasksScenario {
   private app: NestExpressApplication;
@@ -9,15 +10,14 @@ export default class TasksScenario {
     this.app = app;
   }
 
-  public async createTasks() {
+  public async createTasks(listId?: number) {
     const variables = {
       input: {
         name: 'Sample task 1',
-        description: 'This is a description'
+        description: 'This is a description',
+        listId: null
       }
     };
-
-    let id = 0;
 
     await AppTestHelper.gqlRequest(this.app)
       .send({ query: TasksScenarioHelper.getCreateTaskMutation(), variables })
@@ -28,15 +28,24 @@ export default class TasksScenario {
         expect(body.data.createTask.name).toBe(variables.input.name);
         expect(body.data.createTask.description).toBe(variables.input.description);
         expect(body.data.createTask.isDone).toBe(false);
-
-        id = body.data.createTask.id;
       });
 
-    // TODO: Create task associated with list
+    let id = 0;
+
+    if (!listId) {
+      const listsScenario = new ListsScenario(this.app);
+      listId = await listsScenario.createLists();
+    }
+
     variables.input.name = 'Sample task 2';
+    variables.input.listId = listId;
+
     await AppTestHelper.gqlRequest(this.app)
       .send({ query: TasksScenarioHelper.getCreateTaskMutation(), variables })
-      .expect(200);
+      .expect(200)
+      .expect(({ body }) => {
+        id = body.data.createTask.id;
+      });
 
     return id;
   }
@@ -64,7 +73,7 @@ export default class TasksScenario {
       });
   }
 
-  public async listNotDoneTasks() {
+  public async getNotDoneTasks() {
     await this.updateTask();
 
     const variables = {
@@ -83,11 +92,12 @@ export default class TasksScenario {
       .expect(({ body }) => {
         expect(body.data.tasks).toBeDefined();
         expect(body.data.tasks.data.length).toBe(1);
-        expect(body.data.tasks.data[0].name).toBe('Sample task 2');
+        expect(body.data.tasks.data[0].name).toBe('Sample task 1');
+        expect(body.data.tasks.data[0].list).toBeNull();
       });
   }
 
-  public async listDoneTasks() {
+  public async getDoneTasks() {
     await this.updateTask();
 
     const variables = {
@@ -107,6 +117,7 @@ export default class TasksScenario {
         expect(body.data.tasks).toBeDefined();
         expect(body.data.tasks.data.length).toBe(1);
         expect(body.data.tasks.data[0].name).toBe('Sample task (updated)');
+        expect(body.data.tasks.data[0].list.name).toBe('Groceries');
       });
   }
 
@@ -114,11 +125,13 @@ export default class TasksScenario {
     const id = await this.createTasks();
 
     await AppTestHelper.gqlRequest(this.app)
-      .send({ query: TasksScenarioHelper.getOneTaskQuery(), variables: { id } })
+      .send({ query: TasksScenarioHelper.getTaskByIdQuery(), variables: { id } })
       .expect(200)
       .expect(({ body }) => {
         expect(body.data.task).toBeDefined();
-        expect(body.data.task.name).toBe('Sample task 1');
+        expect(body.data.task.name).toBe('Sample task 2');
+        expect(body.data.task.list).toBeDefined();
+        expect(body.data.task.list.name).toBe('Groceries');
       });
   }
 
@@ -130,7 +143,7 @@ export default class TasksScenario {
       .expect(200)
       .expect(({ body }) => {
         expect(body.data.deleteTask).toBeDefined();
-        expect(body.data.deleteTask.name).toBe('Sample task 1');
+        expect(body.data.deleteTask.name).toBe('Sample task 2');
       });
   }
 }

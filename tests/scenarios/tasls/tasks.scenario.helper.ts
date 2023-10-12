@@ -17,6 +17,13 @@ export default class TasksScenarioHelper {
       isDone
       createdAt
       updatedAt
+      list {
+        id
+        name
+        description
+        createdAt
+        updatedAt
+      }
     `;
   }
 
@@ -43,7 +50,7 @@ export default class TasksScenarioHelper {
       `;
   }
 
-  public static getOneTaskQuery() {
+  public static getTaskByIdQuery() {
     return `
     query task($id: Int!) {
       task(id: $id) {
