@@ -8,11 +8,13 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Environments } from './shared/enums';
 import { ListsModule } from './modules/lists/lists.module';
 import generalConfig from './config/general.config';
+import microsoftIdentityConfig from './config/microsoft-identity.config';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [generalConfig, databaseConfig],
+      load: [generalConfig, databaseConfig, microsoftIdentityConfig],
       cache: true
     }),
     DatabaseModule,
@@ -22,7 +24,8 @@ import generalConfig from './config/general.config';
       playground: process.env.NODE_ENV !== Environments.PRODUCTION
     }),
     TasksModule,
-    ListsModule
+    ListsModule,
+    IntegrationsModule
   ],
   providers: []
 })
