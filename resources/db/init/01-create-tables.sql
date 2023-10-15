@@ -17,3 +17,14 @@ CREATE TABLE IF NOT EXISTS tasks (
   FOREIGN KEY (list_id)
       REFERENCES lists (id)
 );
+
+CREATE TABLE IF NOT EXISTS microsoft_integrations (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(255) NOT NULL,
+  access_token TEXT NOT NULL,
+  id_token TEXT NOT NULL,
+  refresh_token TEXT NOT NULL,
+  expires_on TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+);

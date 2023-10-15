@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Redirect, Render } from '@nestjs/common';
+import { Body, Controller, Get, Post, Redirect } from '@nestjs/common';
 import * as msal from '@azure/msal-node';
 import { ConfigService } from '@nestjs/config';
 import { MicrosoftIdentityConfig } from '../../../config/microsoft-identity.config';
+import { MSIdentityService } from './ms-identity.service';
 
 @Controller('microsoft/auth')
 export class MSIdentityController {
@@ -11,77 +12,37 @@ export class MSIdentityController {
 
   private msalConfig: msal.Configuration;
 
-  public constructor(private config: ConfigService) {
+  public constructor(private config: ConfigService, private msIdentityService: MSIdentityService) {
     const microsoftIdentityConfig = this.config.get<MicrosoftIdentityConfig>('microsoftIdentity');
     this.redirectUri = microsoftIdentityConfig.redirectUri;
     this.postLogoutRedirectUri = microsoftIdentityConfig.postLogoutRedirectUri;
 
-    this.msalConfig = this.getMsalConfig(microsoftIdentityConfig);
-  }
-
-  /**
-   * Configuration object to be passed to MSAL instance on creation.
-   */
-  private getMsalConfig(msIdentity: MicrosoftIdentityConfig): msal.Configuration {
-    return {
-      auth: {
-        clientId: msIdentity.clientId,
-        authority: msIdentity.cloudInstance + msIdentity.tenantId,
-        clientSecret: msIdentity.clientSecret
-      },
-      system: {
-        loggerOptions: {
-          loggerCallback(loglevel, message) {
-            console.log(message);
-          },
-          piiLoggingEnabled: false,
-          logLevel: msal.LogLevel.Info
-        }
-      }
-    };
-  }
-
-  @Get()
-  @Render('index')
-  public async root() {
-    return {
-      title: 'Microsoft Identity authentication',
-      signInUrl: await this.getAuthUrl()
-    };
+    this.msalConfig = this.msIdentityService.getMsalConfig(microsoftIdentityConfig);
   }
 
   @Get('signin')
-  public getAuthUrl() {
+  @Redirect()
+  public async getAuthUrl() {
     const msalClient = new msal.ConfidentialClientApplication(this.msalConfig);
 
     const authCodeUrlRequest = {
       redirectUri: `${this.redirectUri}`,
       responseMode: msal.ResponseMode.FORM_POST,
-      scopes: []
+      scopes: this.msIdentityService.getScopes()
     };
 
-    return msalClient.getAuthCodeUrl(authCodeUrlRequest);
+    return {
+      url: await msalClient.getAuthCodeUrl(authCodeUrlRequest)
+    };
   }
 
   @Post('redirect')
-  @Render('token')
   public async receiveRedirectCode(@Body() body: { code: string }) {
     const { code } = body;
-
-    const { accessToken, idToken, tokenType, expiresOn } = await this.getTokensByCode(code);
-    return { accessToken, idToken, tokenType, expiresOn };
-  }
-
-  private getTokensByCode(code: string) {
     const msalClient = new msal.ConfidentialClientApplication(this.msalConfig);
 
-    const tokenRequest = {
-      code,
-      redirectUri: this.redirectUri,
-      scopes: []
-    };
-
-    return msalClient.acquireTokenByCode(tokenRequest);
+    const authResponse = await this.msIdentityService.getTokensByCode(msalClient, code);
+    return this.msIdentityService.saveTokens(authResponse, msalClient);
   }
 
   @Get('signout')
