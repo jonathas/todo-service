@@ -5,7 +5,6 @@ import { TasksResolver } from './tasks.resolver';
 import { TasksService } from './tasks.service';
 import { ListsModule } from '../lists/lists.module';
 import { MicrosoftTodoModule } from '../integrations/microsoft-todo/microsoft-todo.module';
-import { UsersModule } from '../users/users.module';
 import { LoggerModule } from 'nestjs-pino';
 
 @Module({
@@ -13,7 +12,6 @@ import { LoggerModule } from 'nestjs-pino';
     TypeOrmModule.forFeature([Tasks]),
     forwardRef(() => ListsModule),
     MicrosoftTodoModule,
-    UsersModule,
     LoggerModule
   ],
   providers: [TasksResolver, TasksService],

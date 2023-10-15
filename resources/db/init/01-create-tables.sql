@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS lists (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL UNIQUE,
   description VARCHAR(255),
+  ext_id VARCHAR(255),
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
@@ -12,6 +13,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   description VARCHAR(255),
   is_done BOOLEAN NOT NULL DEFAULT FALSE,
   list_id INT,
+  ext_id VARCHAR(255),
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   FOREIGN KEY (list_id)

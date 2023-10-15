@@ -13,6 +13,9 @@ export class Lists extends BaseEntity {
   @Column('varchar', { name: 'description', nullable: true, length: 255 })
   public description: string | null;
 
+  @Column('varchar', { name: 'ext_id', nullable: true, length: 255 })
+  public extId: string | null;
+
   @OneToMany(() => Tasks, (tasks) => tasks.list)
   public tasks: Tasks[];
 }

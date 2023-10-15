@@ -16,11 +16,10 @@ export class CreateTaskInput {
   @IsOptional()
   public description?: string;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Int, { nullable: false })
   @IsInt()
   @Min(1)
-  @IsOptional()
-  public listId?: number;
+  public listId: number;
 }
 
 @InputType()
