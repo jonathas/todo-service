@@ -10,6 +10,7 @@ import { ListsModule } from './modules/lists/lists.module';
 import generalConfig from './config/general.config';
 import microsoftIdentityConfig from './config/microsoft-identity.config';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { HttpModule } from './providers/http/http.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { IntegrationsModule } from './modules/integrations/integrations.module';
       autoSchemaFile: true,
       playground: process.env.NODE_ENV !== Environments.PRODUCTION
     }),
+    HttpModule,
     TasksModule,
     ListsModule,
     IntegrationsModule

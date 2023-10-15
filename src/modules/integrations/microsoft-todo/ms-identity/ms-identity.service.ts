@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MicrosoftIntegrations } from './microsoft-integrations.entity';
+import { MicrosoftIntegrations } from '../microsoft-integrations.entity';
 import { Repository } from 'typeorm';
 import * as msal from '@azure/msal-node';
-import { MicrosoftIdentityConfig } from '../../../config/microsoft-identity.config';
+import { MicrosoftIdentityConfig } from '../../../../config/microsoft-identity.config';
 import { ConfigService } from '@nestjs/config';
+import { UsersService } from '../../../users/users.service';
 
 @Injectable()
 export class MSIdentityService {
@@ -13,7 +14,8 @@ export class MSIdentityService {
   public constructor(
     private config: ConfigService,
     @InjectRepository(MicrosoftIntegrations)
-    private readonly microsoftIntegrationsRepository: Repository<MicrosoftIntegrations>
+    private microsoftIntegrationsRepository: Repository<MicrosoftIntegrations>,
+    private usersService: UsersService
   ) {
     const microsoftIdentityConfig = this.config.get<MicrosoftIdentityConfig>('microsoftIdentity');
     this.redirectUri = microsoftIdentityConfig.redirectUri;
@@ -49,7 +51,8 @@ export class MSIdentityService {
     const tokenRequest = {
       code,
       redirectUri: this.redirectUri,
-      scopes: this.getScopes()
+      scopes: this.getScopes(),
+      authority: 'https://login.microsoftonline.com/common'
     };
 
     return msalClient.acquireTokenByCode(tokenRequest);
@@ -66,15 +69,23 @@ export class MSIdentityService {
       accessToken: authResponse.accessToken,
       idToken: authResponse.idToken,
       expiresOn: authResponse.expiresOn,
-      username,
+      userId: null,
       refreshToken: this.getRefreshToken(msalClient)
     };
 
-    const userTokens = await this.microsoftIntegrationsRepository.findOne({ where: { username } });
-    if (userTokens) {
-      data.id = userTokens.id;
+    let user = await this.usersService.findOneByEmail(username);
+    if (!user) {
+      user = await this.usersService.create(username);
+    } else {
+      const userTokens = await this.microsoftIntegrationsRepository.findOne({
+        where: { userId: user.id }
+      });
+      if (userTokens) {
+        data.id = userTokens.id;
+      }
     }
 
+    data.userId = user.id;
     return this.microsoftIntegrationsRepository.save(
       this.microsoftIntegrationsRepository.create(data)
     );
@@ -84,5 +95,9 @@ export class MSIdentityService {
     const tokenCache = msalClient.getTokenCache().serialize();
     const refreshTokenObject = JSON.parse(tokenCache).RefreshToken;
     return refreshTokenObject[Object.keys(refreshTokenObject)[0]].secret;
+  }
+
+  public getTokensFromDB(userId: number) {
+    return this.microsoftIntegrationsRepository.findOne({ where: { userId } });
   }
 }

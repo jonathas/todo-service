@@ -25,8 +25,8 @@ export class MicrosoftIntegrations {
   @Column('timestamp', { name: 'expires_on', nullable: false })
   public expiresOn: Date;
 
-  @Column('varchar', { name: 'username', nullable: false })
-  public username: string;
+  @Column('int', { name: 'user_id', nullable: false })
+  public userId: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   public createdAt: Date;

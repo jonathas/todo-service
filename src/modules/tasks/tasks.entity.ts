@@ -1,18 +1,9 @@
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Lists } from '../lists/lists.entity';
+import { BaseEntity } from '../../shared/base.entity';
 
 @Entity()
-export class Tasks {
+export class Tasks extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   public id: number;
 
@@ -27,23 +18,6 @@ export class Tasks {
 
   @Column('int', { name: 'list_id', nullable: true })
   public listId: number;
-
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  public createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  public updatedAt: Date;
-
-  @BeforeInsert()
-  public insertCreated() {
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-
-  @BeforeUpdate()
-  public insertUpdated() {
-    this.updatedAt = new Date();
-  }
 
   @OneToOne(() => Lists, (lists) => lists.tasks, {
     onDelete: 'CASCADE',

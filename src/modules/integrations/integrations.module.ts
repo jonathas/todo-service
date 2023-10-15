@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { MicrosoftToDoModule } from './microsoft-todo/microsoft-todo.module';
+import { MicrosoftTodoModule } from './microsoft-todo/microsoft-todo.module';
+import { SyncModule } from './sync/sync.module';
 
 @Module({
-  imports: [MicrosoftToDoModule]
+  imports: [SyncModule, MicrosoftTodoModule]
 })
 export class IntegrationsModule {}
