@@ -11,6 +11,8 @@ import { UsersService } from '../../../users/users.service';
 export class MSIdentityService {
   private redirectUri: string;
 
+  private msalConfig: msal.Configuration;
+
   public constructor(
     private config: ConfigService,
     @InjectRepository(MicrosoftIntegrations)
@@ -19,12 +21,18 @@ export class MSIdentityService {
   ) {
     const microsoftIdentityConfig = this.config.get<MicrosoftIdentityConfig>('microsoftIdentity');
     this.redirectUri = microsoftIdentityConfig.redirectUri;
+
+    this.msalConfig = this.getMsalConfig(microsoftIdentityConfig);
+  }
+
+  public getMsalClient() {
+    return new msal.ConfidentialClientApplication(this.msalConfig);
   }
 
   /**
    * Configuration object to be passed to MSAL instance on creation.
    */
-  public getMsalConfig(msIdentity: MicrosoftIdentityConfig): msal.Configuration {
+  private getMsalConfig(msIdentity: MicrosoftIdentityConfig): msal.Configuration {
     return {
       auth: {
         clientId: msIdentity.clientId,
@@ -47,12 +55,16 @@ export class MSIdentityService {
     return ['User.read', 'Tasks.ReadWrite', 'offline_access'];
   }
 
+  public getAuthority() {
+    return 'https://login.microsoftonline.com/common';
+  }
+
   public getTokensByCode(msalClient: msal.ConfidentialClientApplication, code: string) {
     const tokenRequest = {
       code,
       redirectUri: this.redirectUri,
       scopes: this.getScopes(),
-      authority: 'https://login.microsoftonline.com/common'
+      authority: this.getAuthority()
     };
 
     return msalClient.acquireTokenByCode(tokenRequest);
@@ -69,9 +81,13 @@ export class MSIdentityService {
       accessToken: authResponse.accessToken,
       idToken: authResponse.idToken,
       expiresOn: authResponse.expiresOn,
-      userId: null,
-      refreshToken: this.getRefreshToken(msalClient)
+      userId: null
     };
+
+    const refreshToken = this.getRefreshTokenFromResponse(msalClient);
+    if (refreshToken) {
+      data.refreshToken = refreshToken;
+    }
 
     let user = await this.usersService.findOneByEmail(username);
     if (!user) {
@@ -91,13 +107,34 @@ export class MSIdentityService {
     );
   }
 
-  private getRefreshToken(msalClient: msal.ConfidentialClientApplication) {
-    const tokenCache = msalClient.getTokenCache().serialize();
-    const refreshTokenObject = JSON.parse(tokenCache).RefreshToken;
-    return refreshTokenObject[Object.keys(refreshTokenObject)[0]].secret;
+  private getRefreshTokenFromResponse(msalClient: msal.ConfidentialClientApplication) {
+    try {
+      const tokenCache = msalClient.getTokenCache().serialize();
+      const refreshTokenObject = JSON.parse(tokenCache).RefreshToken;
+      return refreshTokenObject[Object.keys(refreshTokenObject)[0]].secret;
+    } catch (err) {
+      return null;
+    }
   }
 
   public getTokensFromDB(userId: number) {
     return this.microsoftIntegrationsRepository.findOne({ where: { userId } });
+  }
+
+  public async refreshTokens(userId: number) {
+    const tokens = await this.getTokensFromDB(userId);
+    if (!tokens) {
+      throw new Error('No tokens found!');
+    }
+
+    const tokenRequest: msal.RefreshTokenRequest = {
+      refreshToken: tokens.refreshToken,
+      scopes: this.getScopes(),
+      authority: this.getAuthority()
+    };
+
+    const msalClient = this.getMsalClient();
+    const authResponse = await msalClient.acquireTokenByRefreshToken(tokenRequest);
+    return this.saveTokens(authResponse, msalClient);
   }
 }

@@ -1,3 +1,5 @@
+import { HttpMethod } from '../../../shared/enums';
+
 export class UpdateTaskInput {
   public userId: number;
 
@@ -6,4 +8,14 @@ export class UpdateTaskInput {
   public taskId: string;
 
   public taskName: string;
+}
+
+export class CallMicrosoftGraphAPIInput {
+  public userId: number;
+
+  public url: string;
+
+  public method: HttpMethod;
+
+  public body?: unknown;
 }

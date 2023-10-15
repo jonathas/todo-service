@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Lists } from './lists.entity';
 import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,7 +6,6 @@ import { List, PaginatedLists } from './dto/list.dto';
 import { CreateListInput, ListInput, UpdateListInput } from './dto/lists.input';
 import { Tasks } from '../tasks/tasks.entity';
 import { MicrosoftTodoService } from '../integrations/microsoft-todo/microsoft-todo.service';
-import { QueryRunnerHelper } from '../../shared/utils/query-runner-helper.utils';
 import { UsersService } from '../users/users.service';
 import { LoggerService } from '../../providers/logger/logger.service';
 
@@ -46,26 +45,19 @@ export class ListsService {
   }
 
   public async create(input: CreateListInput): Promise<Lists> {
+    // TODO: The user comes from the RequestUser object, populated in the authentication guard.
+    // the method below (findLastUser) is for demo purposes only.
     const user = await this.usersService.findLastUser();
-    const queryRunner = await QueryRunnerHelper.initQueryRunner(this.dataSource);
 
-    try {
-      const list = await queryRunner.manager.save(Lists, this.listsRepository.create(input));
-
-      if (!user) {
-        this.logger.info('User not found in DB');
-        return list;
-      }
-
-      await this.microsoftTodoService.createList(user.id, input.name);
-
+    const list = await this.listsRepository.save(this.listsRepository.create(input));
+    if (!user) {
+      this.logger.info('User not found in DB');
       return list;
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException(err);
-    } finally {
-      await queryRunner.release();
     }
+
+    await this.microsoftTodoService.createList(user.id, input.name);
+
+    return list;
   }
 
   public async update(input: UpdateListInput): Promise<Lists> {

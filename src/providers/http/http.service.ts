@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { LoggerService } from '../logger/logger.service';
 import axiosRetry from 'axios-retry';
 import { ConfigService } from '@nestjs/config';
 import { GeneralConfig } from '../../config/general.config';
+import { HttpRequest } from './http.types';
 
 @Injectable()
 export class HttpService {
@@ -23,54 +24,17 @@ export class HttpService {
     });
   }
 
-  public get(
-    url: string,
-    config: AxiosRequestConfig = {}
-  ): Promise<AxiosResponse<unknown, unknown>> {
-    this.logger.debug(`Get request to url: ${url}`);
-    return axios.get(url, this.populateConfig(config));
-  }
+  public request(req: HttpRequest): Promise<AxiosResponse<unknown, unknown>> {
+    const { url, method, headers, data } = req;
+    this.logger.debug(`Request to url: ${url}`);
 
-  public post(
-    url: string,
-    data: unknown,
-    config: AxiosRequestConfig
-  ): Promise<AxiosResponse<unknown, unknown>> {
-    this.logger.debug(`Post request to url: ${url}`);
-    return axios.post(url, data, this.populateConfig(config));
-  }
-
-  public put(
-    url: string,
-    data: unknown,
-    config: AxiosRequestConfig
-  ): Promise<AxiosResponse<unknown, unknown>> {
-    this.logger.debug(`Put request to url: ${url}`);
-    return axios.put(url, data, this.populateConfig(config));
-  }
-
-  public patch(
-    url: string,
-    data: unknown,
-    config: AxiosRequestConfig
-  ): Promise<AxiosResponse<unknown, unknown>> {
-    this.logger.debug(`Patch request to url: ${url}`);
-    return axios.patch(url, data, this.populateConfig(config));
-  }
-
-  public delete(url: string, config: AxiosRequestConfig): Promise<AxiosResponse<unknown, unknown>> {
-    this.logger.debug(`Put request to url: ${url}`);
-    return axios.delete(url, { ...this.populateConfig(config) });
-  }
-
-  private populateConfig(config: AxiosRequestConfig) {
-    return { ...this.getDefaultConfig(), ...config };
-  }
-
-  private getDefaultConfig(): AxiosRequestConfig {
-    return {
+    return axios.request({
+      url,
+      method,
+      headers,
+      data,
       maxRedirects: 5,
       timeout: 100000
-    };
+    });
   }
 }

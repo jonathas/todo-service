@@ -10,26 +10,22 @@ export class MSIdentityController {
 
   private postLogoutRedirectUri: string;
 
-  private msalConfig: msal.Configuration;
-
   public constructor(private config: ConfigService, private msIdentityService: MSIdentityService) {
     const microsoftIdentityConfig = this.config.get<MicrosoftIdentityConfig>('microsoftIdentity');
     this.redirectUri = microsoftIdentityConfig.redirectUri;
     this.postLogoutRedirectUri = microsoftIdentityConfig.postLogoutRedirectUri;
-
-    this.msalConfig = this.msIdentityService.getMsalConfig(microsoftIdentityConfig);
   }
 
   @Get('signin')
   @Redirect()
   public async getAuthUrl() {
-    const msalClient = new msal.ConfidentialClientApplication(this.msalConfig);
+    const msalClient = this.msIdentityService.getMsalClient();
 
     const authCodeUrlRequest = {
       redirectUri: `${this.redirectUri}`,
       responseMode: msal.ResponseMode.FORM_POST,
       scopes: this.msIdentityService.getScopes(),
-      authority: 'https://login.microsoftonline.com/common'
+      authority: this.msIdentityService.getAuthority()
     };
 
     return {
@@ -40,7 +36,7 @@ export class MSIdentityController {
   @Post('redirect')
   public async receiveRedirectCode(@Body() body: { code: string }) {
     const { code } = body;
-    const msalClient = new msal.ConfidentialClientApplication(this.msalConfig);
+    const msalClient = this.msIdentityService.getMsalClient();
 
     const authResponse = await this.msIdentityService.getTokensByCode(msalClient, code);
     await this.msIdentityService.saveTokens(authResponse, msalClient);
@@ -52,7 +48,7 @@ export class MSIdentityController {
   public getSingoutUrl() {
     return {
       url:
-        this.msalConfig.auth.authority +
+        this.msIdentityService.getAuthority() +
         '/oauth2/v2.0/logout?post_logout_redirect_uri=' +
         this.postLogoutRedirectUri
     };

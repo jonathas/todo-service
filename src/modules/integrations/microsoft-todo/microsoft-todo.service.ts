@@ -2,7 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { HttpService } from '../../../providers/http/http.service';
 import { MSIdentityService } from './ms-identity/ms-identity.service';
 import { ListOutput, ListsResponse, TaskOutput, TasksResponse } from './dto/microsoft-todo.output';
-import { UpdateTaskInput } from './microsoft-todo.types';
+import { CallMicrosoftGraphAPIInput, UpdateTaskInput } from './microsoft-todo.types';
+import { HttpMethod } from '../../../shared/enums';
 
 @Injectable()
 export class MicrosoftTodoService {
@@ -15,6 +16,27 @@ export class MicrosoftTodoService {
     this.baseUrl = 'https://graph.microsoft.com/beta/me/todo/lists';
   }
 
+  private async callAPI<T>(input: CallMicrosoftGraphAPIInput): Promise<T> {
+    const { userId, url, method, body } = input;
+
+    try {
+      const res = await this.httpService.request({
+        url,
+        method,
+        headers: await this.getHeaders(userId),
+        data: body
+      });
+
+      return res.data as T;
+    } catch (err) {
+      if (err?.response?.data?.error?.code === 'InvalidAuthenticationToken') {
+        await this.msIdentityService.refreshTokens(userId);
+        return this.callAPI<T>(input);
+      }
+      throw err;
+    }
+  }
+
   private async getHeaders(userId: number) {
     const tokens = await this.msIdentityService.getTokensFromDB(userId);
     if (!tokens) {
@@ -25,85 +47,91 @@ export class MicrosoftTodoService {
     };
   }
 
-  public async getLists(userId: number): Promise<ListsResponse> {
-    const res = await this.httpService.get(this.baseUrl, {
-      headers: await this.getHeaders(userId)
-    });
-
-    return res.data as ListsResponse;
+  public getLists(userId: number): Promise<ListsResponse> {
+    const input = { userId, url: this.baseUrl, method: HttpMethod.GET };
+    return this.callAPI<ListsResponse>(input);
   }
 
-  public async createList(userId: number, listName: string): Promise<ListOutput> {
-    const res = await this.httpService.post(
-      this.baseUrl,
-      { displayName: listName },
-      { headers: await this.getHeaders(userId) }
-    );
-
-    return res.data as ListOutput;
+  public createList(userId: number, listName: string): Promise<ListOutput> {
+    const input = {
+      userId,
+      url: this.baseUrl,
+      method: HttpMethod.POST,
+      body: { displayName: listName }
+    };
+    return this.callAPI<ListOutput>(input);
   }
 
-  public async updateList(userId: number, listId: string, listName: string): Promise<ListOutput> {
-    const res = await this.httpService.patch(
-      `${this.baseUrl}/${listId}`,
-      { displayName: listName },
-      { headers: await this.getHeaders(userId) }
-    );
-
-    return res.data as ListOutput;
+  public updateList(userId: number, listId: string, listName: string): Promise<ListOutput> {
+    const input = {
+      userId,
+      url: `${this.baseUrl}/${listId}`,
+      method: HttpMethod.PATCH,
+      body: { displayName: listName }
+    };
+    return this.callAPI<ListOutput>(input);
   }
 
-  public async deleteList(userId: number, listId: string): Promise<ListOutput> {
-    const res = await this.httpService.delete(`${this.baseUrl}/${listId}`, {
-      headers: await this.getHeaders(userId)
-    });
-
-    return res.data as ListOutput;
+  public deleteList(userId: number, listId: string): Promise<ListOutput> {
+    const input = {
+      userId,
+      url: `${this.baseUrl}/${listId}`,
+      method: HttpMethod.DELETE
+    };
+    return this.callAPI<ListOutput>(input);
   }
 
-  public async getTasksFromList(userId: number, listId: string): Promise<TasksResponse> {
-    const res = await this.httpService.get(`${this.baseUrl}/${listId}/tasks`, {
-      headers: await this.getHeaders(userId)
-    });
+  public getTasksFromList(userId: number, listId: string): Promise<TasksResponse> {
+    const input = {
+      userId,
+      url: `${this.baseUrl}/${listId}/tasks`,
+      method: HttpMethod.GET
+    };
 
-    return res.data as TasksResponse;
+    return this.callAPI<TasksResponse>(input);
   }
 
-  public async getTask(userId: number, listId: string, taskId: string): Promise<TaskOutput> {
-    const res = await this.httpService.get(`${this.baseUrl}/${listId}/tasks/${taskId}`, {
-      headers: await this.getHeaders(userId)
-    });
+  public getTask(userId: number, listId: string, taskId: string): Promise<TaskOutput> {
+    const input = {
+      userId,
+      url: `${this.baseUrl}/${listId}/tasks/${taskId}`,
+      method: HttpMethod.GET
+    };
 
-    return res.data as TaskOutput;
+    return this.callAPI<TaskOutput>(input);
   }
 
-  public async createTask(userId: number, listId: string, taskName: string): Promise<TaskOutput> {
-    const res = await this.httpService.post(
-      `${this.baseUrl}/${listId}/tasks`,
-      { title: taskName },
-      { headers: await this.getHeaders(userId) }
-    );
+  public createTask(userId: number, listId: string, taskName: string): Promise<TaskOutput> {
+    const input = {
+      userId,
+      url: `${this.baseUrl}/${listId}/tasks`,
+      method: HttpMethod.POST,
+      body: { title: taskName }
+    };
 
-    return res.data as TaskOutput;
+    return this.callAPI<TaskOutput>(input);
   }
 
-  public async updateTask(input: UpdateTaskInput): Promise<TaskOutput> {
+  public updateTask(input: UpdateTaskInput): Promise<TaskOutput> {
     const { userId, listId, taskId, taskName } = input;
 
-    const res = await this.httpService.patch(
-      `${this.baseUrl}/${listId}/tasks/${taskId}`,
-      { title: taskName },
-      { headers: await this.getHeaders(userId) }
-    );
+    const data = {
+      userId,
+      url: `${this.baseUrl}/${listId}/tasks/${taskId}`,
+      method: HttpMethod.PATCH,
+      body: { title: taskName }
+    };
 
-    return res.data as TaskOutput;
+    return this.callAPI<TaskOutput>(data);
   }
 
-  public async deleteTask(userId: number, listId: string, taskId: string): Promise<TaskOutput> {
-    const res = await this.httpService.delete(`${this.baseUrl}/${listId}/tasks/${taskId}`, {
-      headers: await this.getHeaders(userId)
-    });
+  public deleteTask(userId: number, listId: string, taskId: string): Promise<TaskOutput> {
+    const input = {
+      userId,
+      url: `${this.baseUrl}/${listId}/tasks/${taskId}`,
+      method: HttpMethod.DELETE
+    };
 
-    return res.data as TaskOutput;
+    return this.callAPI<TaskOutput>(input);
   }
 }
