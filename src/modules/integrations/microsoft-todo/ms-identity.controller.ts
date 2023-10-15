@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Redirect, Render } from '@nestjs/common';
 import * as msal from '@azure/msal-node';
 import { ConfigService } from '@nestjs/config';
 import { MicrosoftIdentityConfig } from '../../../config/microsoft-identity.config';
@@ -41,6 +41,15 @@ export class MSIdentityController {
     };
   }
 
+  @Get()
+  @Render('index')
+  public async root() {
+    return {
+      title: 'Microsoft Identity authentication',
+      signInUrl: await this.getAuthUrl()
+    };
+  }
+
   @Get('signin')
   public getAuthUrl() {
     const msalClient = new msal.ConfidentialClientApplication(this.msalConfig);
@@ -55,10 +64,12 @@ export class MSIdentityController {
   }
 
   @Post('redirect')
-  public receiveRedirectCode(@Body() body: { code: string }): Promise<msal.AuthenticationResult> {
+  @Render('token')
+  public async receiveRedirectCode(@Body() body: { code: string }) {
     const { code } = body;
 
-    return this.getTokensByCode(code);
+    const { accessToken, idToken, tokenType, expiresOn } = await this.getTokensByCode(code);
+    return { accessToken, idToken, tokenType, expiresOn };
   }
 
   private getTokensByCode(code: string) {
@@ -74,11 +85,13 @@ export class MSIdentityController {
   }
 
   @Get('signout')
+  @Redirect()
   public getSingoutUrl() {
-    return (
-      this.msalConfig.auth.authority +
-      '/oauth2/v2.0/logout?post_logout_redirect_uri=' +
-      this.postLogoutRedirectUri
-    );
+    return {
+      url:
+        this.msalConfig.auth.authority +
+        '/oauth2/v2.0/logout?post_logout_redirect_uri=' +
+        this.postLogoutRedirectUri
+    };
   }
 }
