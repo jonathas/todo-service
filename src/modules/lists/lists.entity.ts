@@ -7,7 +7,7 @@ export class Lists extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   public id: number;
 
-  @Column('varchar', { name: 'name', nullable: false, length: 255 })
+  @Column('varchar', { name: 'name', nullable: false, length: 255, unique: true })
   public name: string;
 
   @Column('varchar', { name: 'description', nullable: true, length: 255 })

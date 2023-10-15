@@ -13,6 +13,19 @@ export class UsersService {
     private usersRepository: Repository<Users>
   ) {}
 
+  /**
+   * For our DEMO purposes
+   */
+  public async findLastUser() {
+    const users = await this.usersRepository.find({
+      select: ['id'],
+      order: { id: 'DESC' },
+      take: 1
+    });
+
+    return users[0];
+  }
+
   public findOne(id: number): Promise<Users> {
     return this.usersRepository.findOne({ where: { id } });
   }

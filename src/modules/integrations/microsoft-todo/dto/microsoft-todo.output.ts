@@ -1,9 +1,17 @@
+export enum TaskStatus {
+  NOT_STARTED = 'notStarted',
+  IN_PROGRESS = 'inProgress',
+  COMPLETED = 'completed',
+  WAITING_ON_OTHERS = 'waitingOnOthers',
+  DEFERRED = 'deferred'
+}
+
 export class TaskOutput {
   public importance: string;
 
   public isReminderOn: boolean;
 
-  public status: string;
+  public status: TaskStatus;
 
   public title: string;
 

@@ -6,16 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MSIdentityService } from './ms-identity/ms-identity.service';
 import { MicrosoftTodoService } from './microsoft-todo.service';
 import { UsersModule } from '../../users/users.module';
-import { SyncModule } from '../sync/sync.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([MicrosoftIntegrations]),
-    ConfigModule,
-    SyncModule,
-    UsersModule
-  ],
+  imports: [TypeOrmModule.forFeature([MicrosoftIntegrations]), ConfigModule, UsersModule],
   controllers: [MSIdentityController],
-  providers: [MSIdentityService, MicrosoftTodoService]
+  providers: [MSIdentityService, MicrosoftTodoService],
+  exports: [MicrosoftTodoService]
 })
 export class MicrosoftTodoModule {}

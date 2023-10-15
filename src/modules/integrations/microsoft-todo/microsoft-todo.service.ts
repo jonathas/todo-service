@@ -1,19 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { SyncService } from '../sync/sync.service';
 import { HttpService } from '../../../providers/http/http.service';
 import { MSIdentityService } from './ms-identity/ms-identity.service';
 import { ListOutput, ListsResponse, TaskOutput, TasksResponse } from './dto/microsoft-todo.output';
 import { UpdateTaskInput } from './microsoft-todo.types';
 
 @Injectable()
-export class MicrosoftTodoService extends SyncService {
+export class MicrosoftTodoService {
   private baseUrl: string;
 
   public constructor(
     private httpService: HttpService,
     private msIdentityService: MSIdentityService
   ) {
-    super();
     this.baseUrl = 'https://graph.microsoft.com/beta/me/todo/lists';
   }
 

@@ -1,16 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Tasks } from './tasks.entity';
 import { PaginatedTasks, Task } from './dto/task.dto';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTaskInput, TaskInput, UpdateTaskInput } from './dto/tasks.input';
+import { MicrosoftTodoService } from '../integrations/microsoft-todo/microsoft-todo.service';
+import { LoggerService } from '../../providers/logger/logger.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class TasksService {
   public constructor(
     @InjectRepository(Tasks)
-    private readonly tasksRepository: Repository<Tasks>
-  ) {}
+    private readonly tasksRepository: Repository<Tasks>,
+    private readonly dataSource: DataSource,
+    private readonly microsoftTodoService: MicrosoftTodoService,
+    private readonly usersService: UsersService,
+    private readonly logger: LoggerService
+  ) {
+    this.logger.setContext(TasksService.name);
+  }
 
   public async findAll(input: TaskInput): Promise<PaginatedTasks> {
     const { isDone, order, sortBy, limit, offset } = input;

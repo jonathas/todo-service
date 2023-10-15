@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Lists } from './lists.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { List, PaginatedLists } from './dto/list.dto';
 import { CreateListInput, ListInput, UpdateListInput } from './dto/lists.input';
 import { Tasks } from '../tasks/tasks.entity';
+import { MicrosoftTodoService } from '../integrations/microsoft-todo/microsoft-todo.service';
+import { QueryRunnerHelper } from '../../shared/utils/query-runner-helper.utils';
+import { UsersService } from '../users/users.service';
+import { LoggerService } from '../../providers/logger/logger.service';
 
 @Injectable()
 export class ListsService {
@@ -12,8 +16,14 @@ export class ListsService {
     @InjectRepository(Lists)
     private readonly listsRepository: Repository<Lists>,
     @InjectRepository(Tasks)
-    private readonly tasksRepository: Repository<Tasks>
-  ) {}
+    private readonly tasksRepository: Repository<Tasks>,
+    private readonly dataSource: DataSource,
+    private readonly microsoftTodoService: MicrosoftTodoService,
+    private readonly usersService: UsersService,
+    private readonly logger: LoggerService
+  ) {
+    this.logger.setContext(ListsService.name);
+  }
 
   public async findAll(input: ListInput): Promise<PaginatedLists> {
     const { order, sortBy, limit, offset } = input;
@@ -35,8 +45,27 @@ export class ListsService {
     return list;
   }
 
-  public create(input: CreateListInput): Promise<Lists> {
-    return this.listsRepository.save(this.listsRepository.create(input));
+  public async create(input: CreateListInput): Promise<Lists> {
+    const user = await this.usersService.findLastUser();
+    const queryRunner = await QueryRunnerHelper.initQueryRunner(this.dataSource);
+
+    try {
+      const list = await queryRunner.manager.save(Lists, this.listsRepository.create(input));
+
+      if (!user) {
+        this.logger.info('User not found in DB');
+        return list;
+      }
+
+      await this.microsoftTodoService.createList(user.id, input.name);
+
+      return list;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(err);
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   public async update(input: UpdateListInput): Promise<Lists> {

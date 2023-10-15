@@ -43,7 +43,8 @@ export class MSIdentityController {
     const msalClient = new msal.ConfidentialClientApplication(this.msalConfig);
 
     const authResponse = await this.msIdentityService.getTokensByCode(msalClient, code);
-    return this.msIdentityService.saveTokens(authResponse, msalClient);
+    await this.msIdentityService.saveTokens(authResponse, msalClient);
+    return { success: true, message: 'Tokens saved' };
   }
 
   @Get('signout')
