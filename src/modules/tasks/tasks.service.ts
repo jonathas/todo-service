@@ -10,6 +10,7 @@ import {
   TaskStatus,
   UpdateMicrosoftTaskInput
 } from '../integrations/microsoft-todo/microsoft-todo.types';
+import { ListOutput, TaskOutput } from '../integrations/microsoft-todo/dto/microsoft-todo.output';
 
 @Injectable()
 export class TasksService {
@@ -33,6 +34,10 @@ export class TasksService {
       .getManyAndCount();
 
     return { data, totalCount };
+  }
+
+  public findAllTasks(): Promise<Tasks[]> {
+    return this.tasksRepository.find();
   }
 
   public findAllByListId(listId: number): Promise<Tasks[]> {
@@ -81,6 +86,23 @@ export class TasksService {
         isDone: status === TaskStatus.COMPLETED,
         listId: listIdFromDB,
         extId,
+        lastSyncedAt: new Date()
+      })
+    );
+  }
+
+  public async createFromExistingInTheAPI(task: TaskOutput, list: ListOutput): Promise<Tasks> {
+    let listFromDB = await this.listsService.findOneByExtId(list.id);
+    if (!listFromDB) {
+      listFromDB = await this.listsService.createFromExistingInTheAPI(list);
+    }
+
+    return this.tasksRepository.save(
+      this.tasksRepository.create({
+        name: task.title,
+        isDone: task.status === TaskStatus.COMPLETED,
+        listId: listFromDB.id,
+        extId: task.id,
         lastSyncedAt: new Date()
       })
     );
@@ -139,6 +161,25 @@ export class TasksService {
         name: title,
         isDone: status === TaskStatus.COMPLETED
       }
+    );
+  }
+
+  public async updateFromExistingInTheAPI(task: TaskOutput, list: ListOutput): Promise<Tasks> {
+    const taskFromDB = await this.tasksRepository.findOne({ where: { name: task.title } });
+    let listFromDB = await this.listsService.findOneByExtId(list.id);
+    if (!listFromDB) {
+      listFromDB = await this.listsService.createFromExistingInTheAPI(list);
+    }
+
+    return this.tasksRepository.save(
+      this.tasksRepository.create({
+        id: taskFromDB.id,
+        listId: listFromDB.id,
+        extId: task.id,
+        lastSyncedAt: new Date(),
+        name: task.title,
+        isDone: task.status === TaskStatus.COMPLETED
+      })
     );
   }
 

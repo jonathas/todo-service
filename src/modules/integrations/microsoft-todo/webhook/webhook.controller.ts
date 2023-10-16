@@ -1,10 +1,13 @@
 import { Body, Controller, Header, Post, Query } from '@nestjs/common';
 import { WebhookNotification } from '../dto/microsoft-todo.output';
 import { WebhookService } from './webhook.service';
+import { LoggerService } from '../../../../providers/logger/logger.service';
 
 @Controller('webhook')
 export class WebhookController {
-  public constructor(private webhookService: WebhookService) {}
+  public constructor(private webhookService: WebhookService, private logger: LoggerService) {
+    this.logger.setContext(WebhookController.name);
+  }
 
   @Post()
   @Header('content-type', 'text/plain')
@@ -12,12 +15,20 @@ export class WebhookController {
     @Body() body: WebhookNotification,
     @Query() query: { validationToken: string }
   ) {
-    if (body?.value?.length) {
-      for (const notificationItem of body.value) {
-        await this.webhookService.handleRequest(notificationItem);
-      }
-    }
+    try {
+      this.logger.info('Received a notification from Microsoft Todo');
+      this.logger.debug(JSON.stringify(body));
 
-    return query?.validationToken;
+      if (body?.value?.length) {
+        for (const notificationItem of body.value) {
+          await this.webhookService.handleRequest(notificationItem);
+        }
+      }
+
+      return query?.validationToken;
+    } catch (err) {
+      this.logger.error(err);
+      return null;
+    }
   }
 }

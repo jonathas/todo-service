@@ -36,6 +36,7 @@ module.exports = {
     'no-undef-init': 'error',
     'prefer-const': 'error',
     'no-eq-null': 'error',
+    'no-console': 'error',
     'max-depth': ['error', 3],
     'no-control-regex': 0,
     '@typescript-eslint/no-floating-promises': ['error'],

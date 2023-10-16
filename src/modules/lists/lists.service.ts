@@ -9,6 +9,7 @@ import { MicrosoftTodoService } from '../integrations/microsoft-todo/microsoft-t
 import { ConfigService } from '@nestjs/config';
 import { MicrosoftGraphConfig } from '../../config/microsoft-graph.config';
 import { SubscriptionsService } from '../integrations/microsoft-todo/subscriptions/subscriptions.service';
+import { ListOutput } from '../integrations/microsoft-todo/dto/microsoft-todo.output';
 
 @Injectable()
 export class ListsService {
@@ -36,6 +37,10 @@ export class ListsService {
     });
 
     return { data, totalCount };
+  }
+
+  public findAllLists(): Promise<Lists[]> {
+    return this.listsRepository.find();
   }
 
   public async findOne(id: number): Promise<Lists> {
@@ -92,6 +97,19 @@ export class ListsService {
     return this.listsRepository.save(this.listsRepository.create(listInput));
   }
 
+  public async createFromExistingInTheAPI(list: ListOutput): Promise<Lists> {
+    const extSubscriptionId = await this.createListSubscription(list.id);
+
+    const listInput: Partial<Lists> = {
+      name: list.displayName,
+      extId: list.id,
+      extSubscriptionId,
+      lastSyncedAt: new Date()
+    };
+
+    return this.listsRepository.save(this.listsRepository.create(listInput));
+  }
+
   public async update(input: UpdateListInput): Promise<Lists> {
     const list = await this.findOne(input.id);
     list.updatedAt = new Date();
@@ -102,6 +120,17 @@ export class ListsService {
     }
 
     return this.listsRepository.save(Object.assign(list, input, { extId }));
+  }
+
+  public async updateFromExistingInTheAPI(list: ListOutput): Promise<Lists> {
+    const listFromDB = await this.listsRepository.findOne({ where: { name: list.displayName } });
+    listFromDB.extId = list.id;
+
+    const extSubscriptionId = await this.createListSubscription(list.id);
+    listFromDB.extSubscriptionId = extSubscriptionId;
+    listFromDB.lastSyncedAt = new Date();
+
+    return this.listsRepository.save(listFromDB);
   }
 
   public async delete(id: number): Promise<List> {
