@@ -234,7 +234,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation StartManualSync {\n  startManualSync\n}\n",
+						"query": "mutation StartManualSync {\n  startManualSync {\n    lists {\n      created\n      updated\n      deleted\n    }\n    tasks {\n      created\n      updated\n      deleted\n    }\n  }\n}\n",
 						"variables": ""
 					}
 				},

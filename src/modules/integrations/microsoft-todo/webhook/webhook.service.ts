@@ -37,11 +37,6 @@ export class WebhookService {
 
     this.logger.error(`Unknown changeType: ${changeType}`);
     return null;
-
-    // TODO: Handle list update (when it's renamed)
-    // TODO: Handle list deletion (when it includes tasks and when it's empty)
-
-    // TODO: Add GraphQL Subscription to inform the client-side when changes are done via Webhook
   }
 
   private getListId(resource: string) {
