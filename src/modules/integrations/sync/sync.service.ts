@@ -7,6 +7,8 @@ import { LoggerService } from '../../../providers/logger/logger.service';
 import { ListOutput } from '../microsoft-todo/dto/microsoft-todo.output';
 import { SyncOutput, SyncStats } from './dto/sync.output';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { ConfigService } from '@nestjs/config';
+import { GeneralConfig } from '../../../config/general.config';
 
 @Injectable()
 export class SyncService {
@@ -14,13 +16,18 @@ export class SyncService {
     private microsoftTodoService: MicrosoftTodoService,
     private tasksService: TasksService,
     private listsService: ListsService,
-    private logger: LoggerService
+    private logger: LoggerService,
+    private config: ConfigService
   ) {
     this.logger.setContext(SyncService.name);
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
   public async handleCron() {
+    const useCron = this.config.get<GeneralConfig>('general').useCron;
+    if (!useCron) {
+      return;
+    }
     this.logger.info('Running cron job');
     const syncResult = await this.sync();
     this.logger.info(syncResult);
