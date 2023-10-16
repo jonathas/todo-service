@@ -6,6 +6,7 @@ import { DataSource } from 'typeorm';
 import { SqlLoggerService } from './sql-logger/sql-logger.service';
 import { SqlLoggerModule } from './sql-logger/sql-logger.module';
 import { LoggerModule } from '../logger/logger.module';
+import { DateScalar } from '../../shared/decorators/date.decorator';
 
 @Module({
   imports: [
@@ -23,6 +24,6 @@ import { LoggerModule } from '../logger/logger.module';
       }
     })
   ],
-  providers: [DatabaseConfigService]
+  providers: [DateScalar, DatabaseConfigService]
 })
 export class DatabaseModule {}

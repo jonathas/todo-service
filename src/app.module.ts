@@ -25,8 +25,10 @@ import redisConfig from './config/redis.config';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      installSubscriptionHandlers: true,
       subscriptions: {
-        'graphql-ws': true
+        'graphql-ws': true,
+        'subscriptions-transport-ws': true
       },
       playground: process.env.NODE_ENV !== Environments.PRODUCTION
     }),

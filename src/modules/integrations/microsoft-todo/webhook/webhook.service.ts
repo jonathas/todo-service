@@ -6,6 +6,8 @@ import { WebhookChangeType } from '../microsoft-todo.types';
 import { ListsService } from '../../../lists/lists.service';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { PUB_SUB } from '../../../../providers/redis/redis-pubsub.module';
+import { Notification } from '../../sync/dto/notification.dto';
+import { Tasks } from '../../../tasks/tasks.entity';
 
 @Injectable()
 export class WebhookService {
@@ -50,15 +52,20 @@ export class WebhookService {
     return null;
   }
 
+  private publishNotification(changeType: WebhookChangeType, task: Tasks) {
+    const notification = new Notification();
+    notification.changeType = changeType;
+    notification.data = task;
+
+    return this.pubSub.publish('notifications', { notifications: notification });
+  }
+
   private async deleteTask(taskId: string) {
     this.logger.info(`Deleting task with extId: ${taskId}`);
     const task = await this.tasksService.findOneByExtId(taskId);
     await this.tasksService.deleteByExtId(task.extId);
 
-    await this.pubSub.publish('notifications', {
-      changeType: WebhookChangeType.DELETED,
-      data: task
-    });
+    await this.publishNotification(WebhookChangeType.DELETED, task);
 
     return task;
   }
@@ -76,10 +83,7 @@ export class WebhookService {
 
     const task = await this.tasksService.createFromExtId(listFromDB.id, listId, taskId);
 
-    await this.pubSub.publish('notifications', {
-      changeType: WebhookChangeType.CREATED,
-      data: task
-    });
+    await this.publishNotification(WebhookChangeType.CREATED, task);
 
     return task;
   }
@@ -107,10 +111,7 @@ export class WebhookService {
     this.logger.info(`Updating task with extId: ${taskId}`);
     const task = await this.tasksService.updateFromExtId(taskFromDB, listId, taskId);
 
-    await this.pubSub.publish('notifications', {
-      changeType: WebhookChangeType.UPDATED,
-      data: task
-    });
+    await this.publishNotification(WebhookChangeType.UPDATED, task);
 
     return task;
   }

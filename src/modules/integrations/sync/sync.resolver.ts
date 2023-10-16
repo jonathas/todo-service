@@ -6,7 +6,7 @@ import { Inject } from '@nestjs/common';
 import { Notification } from './dto/notification.dto';
 import { SyncOutput } from './dto/sync.output';
 
-@Resolver()
+@Resolver(() => SyncOutput)
 export class SyncResolver {
   public constructor(
     private readonly syncService: SyncService,
@@ -18,9 +18,7 @@ export class SyncResolver {
     return this.syncService.sync();
   }
 
-  @Subscription(() => Notification, {
-    name: 'notifications'
-  })
+  @Subscription(() => Notification)
   public notifications() {
     return this.pubSub.asyncIterator('notifications');
   }
