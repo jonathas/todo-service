@@ -15,9 +15,14 @@ export class SubscriptionsService {
     const data: Partial<Subscriptions> = {
       subscriptionId: subscription.id,
       resource: subscription.resource,
+      extListId: this.getListIdFromResource(subscription.resource),
       expirationDateTime: new Date(subscription.expirationDateTime)
     };
     return this.subscriptionsRepository.save(this.subscriptionsRepository.create(data));
+  }
+
+  private getListIdFromResource(resource: string) {
+    return resource.split('/')[4];
   }
 
   public delete(subscriptions: Subscriptions[]) {
