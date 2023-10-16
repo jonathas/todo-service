@@ -14,4 +14,12 @@ services:
     volumes:
       - ./db/init:/docker-entrypoint-initdb.d
       - ./db/data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.2.1-alpine3.18
+    container_name: todo-redis
+    ports:
+      - 6379:6379
+    command: ['redis-server', '--appendonly', 'yes']
+    restart: unless-stopped
   

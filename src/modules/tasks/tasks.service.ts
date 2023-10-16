@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Tasks } from './tasks.entity';
 import { PaginatedTasks } from './dto/task.dto';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTaskInput, TaskInput, UpdateTaskInput } from './dto/tasks.input';
 import { MicrosoftTodoService } from '../integrations/microsoft-todo/microsoft-todo.service';
@@ -148,20 +148,17 @@ export class TasksService {
     taskFromDB: Tasks,
     extListId: string,
     extId: string
-  ): Promise<UpdateResult> {
+  ): Promise<Tasks> {
     const { title, status } = await this.microsoftTodoService.getTask(extListId, extId);
     const listFromDB = await this.listsService.findOneByExtId(extListId);
 
-    return this.tasksRepository.update(
-      { id: taskFromDB.id },
-      {
-        listId: listFromDB.id,
-        extId,
-        lastSyncedAt: new Date(),
-        name: title,
-        isDone: status === TaskStatus.COMPLETED
-      }
-    );
+    taskFromDB.name = title;
+    taskFromDB.listId = listFromDB.id;
+    taskFromDB.extId = extId;
+    taskFromDB.lastSyncedAt = new Date();
+    taskFromDB.isDone = status === TaskStatus.COMPLETED;
+
+    return this.tasksRepository.save(taskFromDB);
   }
 
   public async updateFromExistingInTheAPI(task: TaskOutput, list: ListOutput): Promise<Tasks> {

@@ -11,17 +11,23 @@ import generalConfig from './config/general.config';
 import microsoftGraphConfig from './config/microsoft-graph.config';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { HttpModule } from './providers/http/http.module';
+import { PubSubModule } from './providers/redis/redis-pubsub.module';
+import redisConfig from './config/redis.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [generalConfig, databaseConfig, microsoftGraphConfig],
+      load: [generalConfig, databaseConfig, microsoftGraphConfig, redisConfig],
       cache: true
     }),
     DatabaseModule,
+    PubSubModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      subscriptions: {
+        'graphql-ws': true
+      },
       playground: process.env.NODE_ENV !== Environments.PRODUCTION
     }),
     HttpModule,

@@ -1,3 +1,5 @@
+import { registerEnumType } from '@nestjs/graphql';
+
 export enum TaskStatus {
   NOT_STARTED = 'notStarted',
   IN_PROGRESS = 'inProgress',
@@ -11,6 +13,10 @@ export enum WebhookChangeType {
   UPDATED = 'updated',
   DELETED = 'deleted'
 }
+
+registerEnumType(WebhookChangeType, {
+  name: 'WebhookChangeType'
+});
 
 export class UpdateMicrosoftTaskInput {
   public listId: string;

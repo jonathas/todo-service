@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { WebhookNotificationItem } from '../dto/microsoft-todo.output';
 import { TasksService } from '../../../tasks/tasks.service';
 import { LoggerService } from '../../../../providers/logger/logger.service';
 import { WebhookChangeType } from '../microsoft-todo.types';
 import { ListsService } from '../../../lists/lists.service';
+import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { PUB_SUB } from '../../../../providers/redis/redis-pubsub.module';
 
 @Injectable()
 export class WebhookService {
   public constructor(
     private tasksService: TasksService,
     private listsService: ListsService,
-    private logger: LoggerService
+    private logger: LoggerService,
+    @Inject(PUB_SUB) private pubSub: RedisPubSub
   ) {
     this.logger.setContext(WebhookService.name);
   }
@@ -19,17 +22,16 @@ export class WebhookService {
     const { resourceData, resource, changeType, subscriptionId } = notificationItem;
 
     if (changeType === WebhookChangeType.DELETED) {
-      this.logger.info(`Deleting task with extId: ${resourceData.id}`);
-      return this.tasksService.deleteByExtId(resourceData.id);
+      return this.deleteTask(resourceData.id);
     }
 
-    if ([WebhookChangeType.CREATED, WebhookChangeType.UPDATED].includes(changeType)) {
-      const listId = this.getListId(resource);
+    const listId = this.getListId(resource);
 
-      if (changeType === WebhookChangeType.CREATED) {
-        return this.createTask(listId, subscriptionId, resourceData.id);
-      }
+    if (changeType === WebhookChangeType.CREATED) {
+      return this.createTask(listId, subscriptionId, resourceData.id);
+    }
 
+    if (changeType === WebhookChangeType.UPDATED) {
       return this.updateTask(listId, subscriptionId, resourceData.id);
     }
 
@@ -53,6 +55,19 @@ export class WebhookService {
     return null;
   }
 
+  private async deleteTask(taskId: string) {
+    this.logger.info(`Deleting task with extId: ${taskId}`);
+    const task = await this.tasksService.findOneByExtId(taskId);
+    await this.tasksService.deleteByExtId(task.extId);
+
+    await this.pubSub.publish('notifications', {
+      changeType: WebhookChangeType.DELETED,
+      data: task
+    });
+
+    return task;
+  }
+
   private async createTask(listId: string, subscriptionId: string, taskId: string) {
     const taskFromDB = await this.tasksService.findOneByExtId(taskId);
     if (taskFromDB) {
@@ -64,7 +79,14 @@ export class WebhookService {
 
     const listFromDB = await this.createList(listId, subscriptionId);
 
-    return this.tasksService.createFromExtId(listFromDB.id, listId, taskId);
+    const task = await this.tasksService.createFromExtId(listFromDB.id, listId, taskId);
+
+    await this.pubSub.publish('notifications', {
+      changeType: WebhookChangeType.CREATED,
+      data: task
+    });
+
+    return task;
   }
 
   private async createList(listId: string, subscriptionId: string) {
@@ -88,6 +110,13 @@ export class WebhookService {
     await this.createList(listId, subscriptionId);
 
     this.logger.info(`Updating task with extId: ${taskId}`);
-    return this.tasksService.updateFromExtId(taskFromDB, listId, taskId);
+    const task = await this.tasksService.updateFromExtId(taskFromDB, listId, taskId);
+
+    await this.pubSub.publish('notifications', {
+      changeType: WebhookChangeType.UPDATED,
+      data: task
+    });
+
+    return task;
   }
 }
