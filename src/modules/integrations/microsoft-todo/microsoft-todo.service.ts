@@ -157,4 +157,11 @@ export class MicrosoftTodoService {
       );
     }
   }
+
+  public getSubscription(subscriptionId: string) {
+    return this.callAPI<SubscriptionResponse>(
+      `${this.baseUrlSubscriptions}/${subscriptionId}`,
+      HttpMethod.GET
+    );
+  }
 }

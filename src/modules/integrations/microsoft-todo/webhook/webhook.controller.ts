@@ -12,8 +12,10 @@ export class WebhookController {
     @Body() body: WebhookNotification,
     @Query() query: { validationToken: string }
   ) {
-    for (const notificationItem of body.value) {
-      await this.webhookService.handleRequest(notificationItem);
+    if (body?.value?.length) {
+      for (const notificationItem of body.value) {
+        await this.webhookService.handleRequest(notificationItem);
+      }
     }
 
     return query?.validationToken;

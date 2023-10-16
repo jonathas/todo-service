@@ -81,6 +81,14 @@ export class ListsService {
       lastSyncedAt: new Date()
     };
 
+    const subscriptionFromDB = await this.subscriptionsService.findOneBySubscriptionId(
+      extSubscriptionId
+    );
+    if (!subscriptionFromDB) {
+      const subscription = await this.microsoftTodoService.getSubscription(extSubscriptionId);
+      await this.subscriptionsService.create(subscription);
+    }
+
     return this.listsRepository.save(this.listsRepository.create(listInput));
   }
 
