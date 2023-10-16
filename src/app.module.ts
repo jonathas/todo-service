@@ -13,6 +13,7 @@ import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { HttpModule } from './providers/http/http.module';
 import { PubSubModule } from './providers/redis/redis-pubsub.module';
 import redisConfig from './config/redis.config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import redisConfig from './config/redis.config';
     }),
     DatabaseModule,
     PubSubModule,
+    ScheduleModule.forRoot(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,

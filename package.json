@@ -46,6 +46,7 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/graphql": "^12.0.9",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/schedule": "^3.0.4",
     "@nestjs/typeorm": "^10.0.0",
     "axios": "^1.5.1",
     "axios-retry": "^3.8.0",
