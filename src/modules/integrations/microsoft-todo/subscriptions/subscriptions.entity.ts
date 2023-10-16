@@ -12,6 +12,6 @@ export class Subscriptions extends BaseEntity {
   @Column('varchar', { name: 'resource', nullable: false, length: 255 })
   public resource: string;
 
-  @Column('varchar', { name: 'expiration_date_time', nullable: false, length: 40 })
+  @Column('timestamp', { name: 'expiration_date_time', nullable: false })
   public expirationDateTime: Date;
 }

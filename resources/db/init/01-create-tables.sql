@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS lists (
   name VARCHAR(255) NOT NULL UNIQUE,
   description VARCHAR(255),
   ext_id VARCHAR(255),
+  ext_subscription_id VARCHAR(255),
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
 );
@@ -40,3 +41,12 @@ CREATE TABLE IF NOT EXISTS microsoft_integrations (
     FOREIGN KEY (user_id)
       REFERENCES users (id)
 );
+
+CREATE TABLE IF NOT EXISTS subscriptions {
+  id SERIAL PRIMARY KEY,
+  subscription_id VARCHAR(255) NOT NULL,
+  resource VARCHAR(255) NOT NULL,
+  expiration_date_time TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+};
