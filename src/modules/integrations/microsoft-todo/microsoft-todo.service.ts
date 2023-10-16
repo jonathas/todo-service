@@ -33,6 +33,9 @@ export class MicrosoftTodoService {
     // populated in the authentication guard.
     // The method below (findLastUser) is for demo purposes only.
     const user = await this.usersService.findLastUser();
+    if (!user) {
+      throw new UnauthorizedException('No user found! Please authenticate first.');
+    }
 
     try {
       const res = await this.httpService.request({
