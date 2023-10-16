@@ -4,6 +4,7 @@ import { List, ListDetails, PaginatedLists } from './dto/list.dto';
 import { CreateListInput, ListInput, UpdateListInput } from './dto/lists.input';
 import { Task } from '../tasks/dto/task.dto';
 import { TasksService } from '../tasks/tasks.service';
+import { TaskInput } from '../tasks/dto/tasks.input';
 
 @Resolver(() => ListDetails)
 export class ListsResolver {
@@ -18,8 +19,8 @@ export class ListsResolver {
   }
 
   @ResolveField(() => [Task])
-  public tasks(@Parent() list: List) {
-    return this.tasksService.findAllByListId(list.id);
+  public tasks(@Parent() list: List, @Args('input') input: TaskInput) {
+    return this.tasksService.findAllByListId(list.id, input);
   }
 
   @Query(() => PaginatedLists, { name: 'lists' })

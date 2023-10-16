@@ -148,7 +148,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "{\n  list(id: 1) {\n    id\n    name\n    description\n    createdAt\n    updatedAt\n    tasks {\n      id\n      name\n      description\n      isDone\n    }\n  }\n}\n",
+								"query": "{\n  list(id: 2) {\n    id\n    name\n    description\n    createdAt\n    updatedAt\n    tasks(input: { offset: 0, limit: 10 }) {\n      totalCount\n      data {\n        id\n        name\n        description\n        isDone\n      }\n    }\n  }\n}\n",
 								"variables": ""
 							}
 						},

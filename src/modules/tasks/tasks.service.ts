@@ -40,10 +40,15 @@ export class TasksService {
     return this.tasksRepository.find();
   }
 
-  public findAllByListId(listId: number): Promise<Tasks[]> {
-    return this.tasksRepository.find({
-      where: { listId }
+  public async findAllByListId(listId: number, input: TaskInput): Promise<PaginatedTasks> {
+    const [data, totalCount] = await this.tasksRepository.findAndCount({
+      where: { listId },
+      order: { [input.sortBy]: input.order },
+      take: input.limit,
+      skip: input.offset
     });
+
+    return { data, totalCount };
   }
 
   public async findOne(id: number): Promise<Tasks> {
