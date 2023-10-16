@@ -54,7 +54,9 @@ export class SyncService {
       listsFromDB.find((listDB) => listDB.name === list.displayName)
     );
     await Promise.all(
-      listsToUpdate.map((list) => this.listsService.updateFromExistingInTheAPI(list))
+      listsToUpdate.map((list) =>
+        this.listsService.updateFromExistingInTheAPI(list.displayName, list.id)
+      )
     );
 
     // Not in the API anymore, but still in the DB. Delete them.
@@ -66,7 +68,23 @@ export class SyncService {
       await this.listsService.delete(listDelete.id);
     }
 
-    return new SyncStats(listsToCreate.length, listsToUpdate.length, listsToDelete.length);
+    // The extId is the same, but the name is different, update the name.
+    const listsToUpdateName = listsFromAPI.filter((listAPI) =>
+      listsFromDB.find(
+        (listDB) => listDB.extId === listAPI.id && listDB.name !== listAPI.displayName
+      )
+    );
+    await Promise.all(
+      listsToUpdateName.map((list) =>
+        this.listsService.updateFromExistingInTheAPI(list.displayName, list.id)
+      )
+    );
+
+    return new SyncStats(
+      listsToCreate.length,
+      listsToUpdate.length + listsToUpdateName.length,
+      listsToDelete.length
+    );
   }
 
   private async syncTasks(): Promise<SyncStats> {

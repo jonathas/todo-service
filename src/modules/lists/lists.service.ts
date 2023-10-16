@@ -125,12 +125,18 @@ export class ListsService {
     return this.listsRepository.save(Object.assign(list, input, { extId }));
   }
 
-  public async updateFromExistingInTheAPI(list: ListOutput): Promise<Lists> {
-    const listFromDB = await this.listsRepository.findOne({ where: { name: list.displayName } });
-    listFromDB.extId = list.id;
+  public async updateFromExistingInTheAPI(displayName: string, extId: string): Promise<Lists> {
+    const listFromDB = await this.listsRepository.findOne({
+      where: [{ name: displayName }, { extId }]
+    });
 
-    const extSubscriptionId = await this.createListSubscription(list.id);
-    listFromDB.extSubscriptionId = extSubscriptionId;
+    if (!listFromDB.extId) {
+      listFromDB.extId = extId;
+      const extSubscriptionId = await this.createListSubscription(extId);
+      listFromDB.extSubscriptionId = extSubscriptionId;
+    }
+
+    listFromDB.name = displayName;
     listFromDB.lastSyncedAt = new Date();
 
     return this.listsRepository.save(listFromDB);
