@@ -150,7 +150,7 @@ export class TasksService {
       await this.microsoftTodoService.deleteTask(list.extId, task.extId);
     }
 
-    await this.tasksRepository.remove(task);
+    await this.tasksRepository.delete({ id: task.id });
 
     return task;
   }
