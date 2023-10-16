@@ -5,6 +5,7 @@ import { ListsService } from '../../lists/lists.service';
 import { Tasks } from '../../tasks/tasks.entity';
 import { LoggerService } from '../../../providers/logger/logger.service';
 import { ListOutput } from '../microsoft-todo/dto/microsoft-todo.output';
+import { SyncOutput, SyncStats } from './dto/sync.output';
 
 @Injectable()
 export class SyncService {
@@ -17,18 +18,23 @@ export class SyncService {
     this.logger.setContext(SyncService.name);
   }
 
-  public async sync() {
-    await this.syncLists();
-    await this.syncTasks();
+  public async sync(): Promise<SyncOutput> {
+    const lists = await this.syncLists();
+    const tasks = await this.syncTasks();
+
+    return {
+      lists,
+      tasks
+    };
   }
 
-  private async syncLists() {
+  private async syncLists(): Promise<SyncStats> {
     const listsFromDB = await this.listsService.findAllLists();
     const listsFromAPI = (await this.microsoftTodoService.getLists())?.value;
 
     if (!listsFromDB.length && !listsFromAPI.length) {
       this.logger.info('No lists found in DB and in the API. Nothing to sync.');
-      return;
+      return new SyncStats(0, 0, 0);
     }
 
     const listsFromAPIWithNoExtIdInDB = listsFromAPI.filter(
@@ -59,11 +65,12 @@ export class SyncService {
     for (const listDelete of listsToDelete) {
       await this.listsService.delete(listDelete.id);
     }
+
+    return new SyncStats(listsToCreate.length, listsToUpdate.length, listsToDelete.length);
   }
 
-  private async syncTasks() {
+  private async syncTasks(): Promise<SyncStats> {
     const tasksFromDB = await this.tasksService.findAllTasks();
-
     const listsFromAPI = (await this.microsoftTodoService.getLists())?.value;
 
     if (!tasksFromDB.length && !listsFromAPI.length) {
@@ -71,9 +78,16 @@ export class SyncService {
       return;
     }
 
+    const globalStats = new SyncStats(0, 0, 0);
+
     for (const listAPI of listsFromAPI) {
-      await this.downloadTasksFromList(listAPI, tasksFromDB);
+      const stats = await this.downloadTasksFromList(listAPI, tasksFromDB);
+      globalStats.created += stats.created;
+      globalStats.updated += stats.updated;
+      globalStats.deleted += stats.deleted;
     }
+
+    return globalStats;
   }
 
   private async downloadTasksFromList(listAPI: ListOutput, tasksFromDB: Tasks[]) {
@@ -107,5 +121,7 @@ export class SyncService {
     for (const taskDelete of tasksToDelete) {
       await this.tasksService.delete(taskDelete.id);
     }
+
+    return new SyncStats(tasksToCreate.length, tasksToUpdate.length, tasksToDelete.length);
   }
 }

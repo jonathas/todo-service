@@ -6,7 +6,6 @@ import * as msal from '@azure/msal-node';
 import { MicrosoftGraphConfig } from '../../../../config/microsoft-graph.config';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../../users/users.service';
-import { LoggerService } from '../../../../providers/logger/logger.service';
 
 @Injectable()
 export class MSIdentityService {
@@ -18,10 +17,8 @@ export class MSIdentityService {
     private config: ConfigService,
     @InjectRepository(MicrosoftIntegrations)
     private microsoftIntegrationsRepository: Repository<MicrosoftIntegrations>,
-    private usersService: UsersService,
-    private logger: LoggerService
+    private usersService: UsersService
   ) {
-    this.logger.setContext(MSIdentityService.name);
     const microsoftGraphConfig = this.config.get<MicrosoftGraphConfig>('microsoftGraph');
     this.redirectUri = microsoftGraphConfig.redirectUri;
 
@@ -45,7 +42,7 @@ export class MSIdentityService {
       system: {
         loggerOptions: {
           loggerCallback(loglevel, message) {
-            this.logger.info(message);
+            console.log(message);
           },
           piiLoggingEnabled: false,
           logLevel: msal.LogLevel.Info

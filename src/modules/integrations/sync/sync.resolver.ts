@@ -4,6 +4,7 @@ import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { PUB_SUB } from '../../../providers/redis/redis-pubsub.module';
 import { Inject } from '@nestjs/common';
 import { Notification } from './dto/notification.dto';
+import { SyncOutput } from './dto/sync.output';
 
 @Resolver()
 export class SyncResolver {
@@ -12,7 +13,7 @@ export class SyncResolver {
     @Inject(PUB_SUB) private pubSub: RedisPubSub
   ) {}
 
-  @Mutation(() => Boolean)
+  @Mutation(() => SyncOutput)
   public startManualSync() {
     return this.syncService.sync();
   }

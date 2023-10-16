@@ -81,7 +81,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation updateTask($input: UpdateTaskInput!) {\n\tupdateTask(input: $input) {\n    id\n    name\n    description\n    isDone\n    createdAt\n    updatedAt\n  }\n}\n",
-								"variables": "{\n\t\"input\": {\n    \"id\": 1,\n    \"isDone\": true\n  }\n}"
+								"variables": "{\n\t\"input\": {\n    \"id\": 1,\n    \"isDone\": false,\n    \"name\": \"This is my task!\",\n    \"listId\": 1\n  }\n}"
 							}
 						},
 						"url": {
@@ -170,7 +170,7 @@
 							"mode": "graphql",
 							"graphql": {
 								"query": "mutation createList($input: CreateListInput!) {\n  createList(input: $input) {\n    id\n    name\n    description\n    createdAt\n    updatedAt\n  }\n}\n",
-								"variables": "{\n\t\"input\": {\n    \"name\": \"MyList\",\n    \"description\": \"This is an important list\"\n  }\n}"
+								"variables": "{\n\t\"input\": {\n    \"name\": \"Tomorrow\",\n    \"description\": \"This is an important list\"\n  }\n}"
 							}
 						},
 						"url": {
@@ -225,6 +225,27 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Start manual sync",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation StartManualSync {\n  startManualSync\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{apiUrl}}",
+					"host": [
+						"{{apiUrl}}"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
