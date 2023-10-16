@@ -120,7 +120,7 @@ export class ListsService {
     }
 
     await this.tasksRepository.delete({ listId: list.id });
-    await this.listsRepository.remove(list);
+    await this.listsRepository.delete({ id: list.id });
 
     return list;
   }
