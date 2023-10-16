@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTaskInput, TaskInput, UpdateTaskInput } from './dto/tasks.input';
 import { MicrosoftTodoService } from '../integrations/microsoft-todo/microsoft-todo.service';
-import { LoggerService } from '../../providers/logger/logger.service';
 import { ListsService } from '../lists/lists.service';
 
 @Injectable()
@@ -14,11 +13,8 @@ export class TasksService {
     @InjectRepository(Tasks)
     private readonly tasksRepository: Repository<Tasks>,
     private readonly listsService: ListsService,
-    private readonly microsoftTodoService: MicrosoftTodoService,
-    private readonly logger: LoggerService
-  ) {
-    this.logger.setContext(TasksService.name);
-  }
+    private readonly microsoftTodoService: MicrosoftTodoService
+  ) {}
 
   public async findAll(input: TaskInput): Promise<PaginatedTasks> {
     const { isDone, order, sortBy, limit, offset } = input;

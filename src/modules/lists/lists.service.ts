@@ -6,7 +6,6 @@ import { List, PaginatedLists } from './dto/list.dto';
 import { CreateListInput, ListInput, UpdateListInput } from './dto/lists.input';
 import { Tasks } from '../tasks/tasks.entity';
 import { MicrosoftTodoService } from '../integrations/microsoft-todo/microsoft-todo.service';
-import { LoggerService } from '../../providers/logger/logger.service';
 
 @Injectable()
 export class ListsService {
@@ -15,11 +14,8 @@ export class ListsService {
     private readonly listsRepository: Repository<Lists>,
     @InjectRepository(Tasks)
     private readonly tasksRepository: Repository<Tasks>,
-    private readonly microsoftTodoService: MicrosoftTodoService,
-    private readonly logger: LoggerService
-  ) {
-    this.logger.setContext(ListsService.name);
-  }
+    private readonly microsoftTodoService: MicrosoftTodoService
+  ) {}
 
   public async findAll(input: ListInput): Promise<PaginatedLists> {
     const { order, sortBy, limit, offset } = input;

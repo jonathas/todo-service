@@ -53,4 +53,9 @@ export class MSIdentityController {
         this.postLogoutRedirectUri
     };
   }
+
+  @Post('notify')
+  public notify(@Body() body: unknown) {
+    return body;
+  }
 }
