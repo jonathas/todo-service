@@ -42,11 +42,11 @@ CREATE TABLE IF NOT EXISTS microsoft_integrations (
       REFERENCES users (id)
 );
 
-CREATE TABLE IF NOT EXISTS subscriptions {
+CREATE TABLE IF NOT EXISTS subscriptions (
   id SERIAL PRIMARY KEY,
   subscription_id VARCHAR(255) NOT NULL,
   resource VARCHAR(255) NOT NULL,
   expiration_date_time TIMESTAMP NOT NULL,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
-};
+);
