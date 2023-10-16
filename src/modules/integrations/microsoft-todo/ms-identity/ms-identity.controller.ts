@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Redirect } from '@nestjs/common';
 import * as msal from '@azure/msal-node';
 import { ConfigService } from '@nestjs/config';
-import { MicrosoftIdentityConfig } from '../../../../config/microsoft-identity.config';
+import { MicrosoftGraphConfig } from '../../../../config/microsoft-graph.config';
 import { MSIdentityService } from './ms-identity.service';
 
 @Controller('microsoft/auth')
@@ -11,9 +11,9 @@ export class MSIdentityController {
   private postLogoutRedirectUri: string;
 
   public constructor(private config: ConfigService, private msIdentityService: MSIdentityService) {
-    const microsoftIdentityConfig = this.config.get<MicrosoftIdentityConfig>('microsoftIdentity');
-    this.redirectUri = microsoftIdentityConfig.redirectUri;
-    this.postLogoutRedirectUri = microsoftIdentityConfig.postLogoutRedirectUri;
+    const microsoftGraphConfig = this.config.get<MicrosoftGraphConfig>('microsoftGraph');
+    this.redirectUri = microsoftGraphConfig.redirectUri;
+    this.postLogoutRedirectUri = microsoftGraphConfig.postLogoutRedirectUri;
   }
 
   @Get('signin')
@@ -52,10 +52,5 @@ export class MSIdentityController {
         '/oauth2/v2.0/logout?post_logout_redirect_uri=' +
         this.postLogoutRedirectUri
     };
-  }
-
-  @Post('notify')
-  public notify(@Body() body: unknown) {
-    return body;
   }
 }

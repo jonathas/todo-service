@@ -8,14 +8,14 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Environments } from './shared/enums';
 import { ListsModule } from './modules/lists/lists.module';
 import generalConfig from './config/general.config';
-import microsoftIdentityConfig from './config/microsoft-identity.config';
+import microsoftGraphConfig from './config/microsoft-graph.config';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { HttpModule } from './providers/http/http.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [generalConfig, databaseConfig, microsoftIdentityConfig],
+      load: [generalConfig, databaseConfig, microsoftGraphConfig],
       cache: true
     }),
     DatabaseModule,

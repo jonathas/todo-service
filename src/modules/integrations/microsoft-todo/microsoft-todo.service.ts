@@ -5,10 +5,13 @@ import { ListOutput, ListsResponse, TaskOutput, TasksResponse } from './dto/micr
 import { HttpMethod } from '../../../shared/enums';
 import { UsersService } from '../../users/users.service';
 import { UpdateMicrosoftTaskInput } from './microsoft-todo.types';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class MicrosoftTodoService {
   private baseUrl: string;
+
+  private baseUrlSubscriptions: string;
 
   public constructor(
     private httpService: HttpService,
@@ -16,6 +19,7 @@ export class MicrosoftTodoService {
     private usersService: UsersService
   ) {
     this.baseUrl = 'https://graph.microsoft.com/beta/me/todo/lists';
+    this.baseUrlSubscriptions = 'https://graph.microsoft.com/v1.0/subscriptions';
   }
 
   private async callAPI<T>(url: string, method: HttpMethod, body?: unknown): Promise<T> {
@@ -102,5 +106,37 @@ export class MicrosoftTodoService {
 
   public deleteTask(listId: string, taskId: string): Promise<TaskOutput> {
     return this.callAPI<TaskOutput>(`${this.baseUrl}/${listId}/tasks/${taskId}`, HttpMethod.DELETE);
+  }
+
+  /**
+   * Expiration DateTime (Maximum length of subscription):
+   * @see https://tinyurl.com/y6drzxrn
+   */
+  public async subscribe(webhookUrl: string) {
+    const lists = await this.getLists();
+
+    if (!lists.value.length) {
+      return {
+        message: 'No lists found. Please create a list first.'
+      };
+    }
+
+    const listIds = lists.value.map((list) => list.id);
+
+    const body = {
+      changeType: 'created,updated,deleted',
+      notificationUrl: webhookUrl,
+      resource: '',
+      expirationDateTime: dayjs().add(4230, 'minute').toISOString()
+    };
+
+    for (const listId of listIds) {
+      body.resource = `/me/todo/lists/${listId}/tasks`;
+      await this.callAPI(this.baseUrlSubscriptions, HttpMethod.POST, body);
+    }
+
+    return {
+      message: 'Subscribed successfully!'
+    };
   }
 }

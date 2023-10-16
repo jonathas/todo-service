@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MicrosoftIntegrations } from '../microsoft-integrations.entity';
 import { Repository } from 'typeorm';
 import * as msal from '@azure/msal-node';
-import { MicrosoftIdentityConfig } from '../../../../config/microsoft-identity.config';
+import { MicrosoftGraphConfig } from '../../../../config/microsoft-graph.config';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../../users/users.service';
 
@@ -19,10 +19,10 @@ export class MSIdentityService {
     private microsoftIntegrationsRepository: Repository<MicrosoftIntegrations>,
     private usersService: UsersService
   ) {
-    const microsoftIdentityConfig = this.config.get<MicrosoftIdentityConfig>('microsoftIdentity');
-    this.redirectUri = microsoftIdentityConfig.redirectUri;
+    const microsoftGraphConfig = this.config.get<MicrosoftGraphConfig>('microsoftGraph');
+    this.redirectUri = microsoftGraphConfig.redirectUri;
 
-    this.msalConfig = this.getMsalConfig(microsoftIdentityConfig);
+    this.msalConfig = this.getMsalConfig(microsoftGraphConfig);
   }
 
   public getMsalClient() {
@@ -32,7 +32,7 @@ export class MSIdentityService {
   /**
    * Configuration object to be passed to MSAL instance on creation.
    */
-  private getMsalConfig(msIdentity: MicrosoftIdentityConfig): msal.Configuration {
+  private getMsalConfig(msIdentity: MicrosoftGraphConfig): msal.Configuration {
     return {
       auth: {
         clientId: msIdentity.clientId,

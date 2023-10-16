@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 
-export interface MicrosoftIdentityConfig {
+export interface MicrosoftGraphConfig {
   cloudInstance: string;
   tenantId: string;
   clientId: string;
@@ -8,17 +8,21 @@ export interface MicrosoftIdentityConfig {
   redirectUri: string;
   postLogoutRedirectUri: string;
   graphApiEndpoint: string;
+  useWebhook: boolean;
+  webhookUrl: string;
 }
 
 export default registerAs(
-  'microsoftIdentity',
-  (): MicrosoftIdentityConfig => ({
+  'microsoftGraph',
+  (): MicrosoftGraphConfig => ({
     cloudInstance: process.env.MICROSOFT_IDENTITY_CLOUD_INSTANCE,
     tenantId: process.env.MICROSOFT_IDENTITY_TENANT_ID,
     clientId: process.env.MICROSOFT_IDENTITY_CLIENT_ID,
     clientSecret: process.env.MICROSOFT_IDENTITY_CLIENT_SECRET,
     redirectUri: process.env.MICROSOFT_IDENTITY_REDIRECT_URI,
     postLogoutRedirectUri: process.env.MICROSOFT_IDENTITY_POST_LOGOUT_REDIRECT_URI,
-    graphApiEndpoint: process.env.MICROSOFT_IDENTITY_GRAPH_API_ENDPOINT
+    graphApiEndpoint: process.env.MICROSOFT_IDENTITY_GRAPH_API_ENDPOINT,
+    useWebhook: process.env.MICROSOFT_IDENTITY_USE_WEBHOOK === 'true',
+    webhookUrl: process.env.MICROSOFT_IDENTITY_WEBHOOK_URL
   })
 );
