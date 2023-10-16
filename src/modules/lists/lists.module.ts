@@ -6,12 +6,14 @@ import { ListsService } from './lists.service';
 import { TasksModule } from '../tasks/tasks.module';
 import { Tasks } from '../tasks/tasks.entity';
 import { MicrosoftTodoModule } from '../integrations/microsoft-todo/microsoft-todo.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Lists, Tasks]),
     forwardRef(() => TasksModule),
-    MicrosoftTodoModule
+    MicrosoftTodoModule,
+    ConfigModule
   ],
   providers: [ListsResolver, ListsService],
   exports: [ListsService]

@@ -1,15 +1,8 @@
-import {
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity } from '../../../shared/base.entity';
 
 @Entity({ name: 'microsoft_integrations' })
-export class MicrosoftIntegrations {
+export class MicrosoftIntegrations extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   public id: number;
 
@@ -27,21 +20,4 @@ export class MicrosoftIntegrations {
 
   @Column('int', { name: 'user_id', nullable: false })
   public userId: number;
-
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  public createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  public updatedAt: Date;
-
-  @BeforeInsert()
-  public insertCreated() {
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-
-  @BeforeUpdate()
-  public insertUpdated() {
-    this.updatedAt = new Date();
-  }
 }

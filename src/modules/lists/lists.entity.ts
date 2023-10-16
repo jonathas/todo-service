@@ -16,6 +16,9 @@ export class Lists extends BaseEntity {
   @Column('varchar', { name: 'ext_id', nullable: true, length: 255 })
   public extId: string | null;
 
+  @Column('varchar', { name: 'ext_subscription_id', nullable: true, length: 255 })
+  public extSubscriptionId: string | null;
+
   @OneToMany(() => Tasks, (tasks) => tasks.list)
   public tasks: Tasks[];
 }

@@ -1,7 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { HttpService } from '../../../providers/http/http.service';
 import { MSIdentityService } from './ms-identity/ms-identity.service';
-import { ListOutput, ListsResponse, TaskOutput, TasksResponse } from './dto/microsoft-todo.output';
+import {
+  ListOutput,
+  ListsResponse,
+  SubscriptionResponse,
+  TaskOutput,
+  TasksResponse
+} from './dto/microsoft-todo.output';
 import { HttpMethod } from '../../../shared/enums';
 import { UsersService } from '../../users/users.service';
 import { UpdateMicrosoftTaskInput } from './microsoft-todo.types';
@@ -109,19 +115,14 @@ export class MicrosoftTodoService {
   }
 
   /**
+   * Subscribe to Microsoft Graph API webhook notifications.
    * Expiration DateTime (Maximum length of subscription):
    * @see https://tinyurl.com/y6drzxrn
    */
-  public async subscribe(webhookUrl: string) {
-    const lists = await this.getLists();
-
-    if (!lists.value.length) {
-      return {
-        message: 'No lists found. Please create a list first.'
-      };
+  public async subscribe(listIds: string[], webhookUrl: string) {
+    if (!listIds.length) {
+      throw new Error('No lists found. Please create a list first.');
     }
-
-    const listIds = lists.value.map((list) => list.id);
 
     const body = {
       changeType: 'created,updated,deleted',
@@ -130,13 +131,27 @@ export class MicrosoftTodoService {
       expirationDateTime: dayjs().add(4230, 'minute').toISOString()
     };
 
+    const subscriptions: SubscriptionResponse[] = [];
+
     for (const listId of listIds) {
       body.resource = `/me/todo/lists/${listId}/tasks`;
-      await this.callAPI(this.baseUrlSubscriptions, HttpMethod.POST, body);
+      const res = await this.callAPI<SubscriptionResponse>(
+        this.baseUrlSubscriptions,
+        HttpMethod.POST,
+        body
+      );
+      subscriptions.push(res);
     }
 
-    return {
-      message: 'Subscribed successfully!'
-    };
+    return subscriptions;
+  }
+
+  public async unsubscribe(subscriptionIds: string[]) {
+    for (const id of subscriptionIds) {
+      await this.callAPI<SubscriptionResponse>(
+        `${this.baseUrlSubscriptions}/${id}`,
+        HttpMethod.DELETE
+      );
+    }
   }
 }

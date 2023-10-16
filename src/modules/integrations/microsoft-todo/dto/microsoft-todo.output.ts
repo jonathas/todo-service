@@ -42,3 +42,35 @@ export class ListOutput {
 export class ListsResponse {
   public value: ListOutput[];
 }
+
+export class SubscriptionResponse {
+  public id: string;
+
+  public resource: string;
+
+  public applicationId: string;
+
+  public changeType: string;
+
+  public clientState: unknown;
+
+  public notificationUrl: string;
+
+  public notificationQueryOptions: unknown;
+
+  public lifecycleNotificationUrl: unknown;
+
+  public expirationDateTime: string;
+
+  public creatorId: string;
+
+  public includeResourceData: unknown;
+
+  public latestSupportedTlsVersion: string;
+
+  public encryptionCertificate: unknown;
+
+  public encryptionCertificateId: unknown;
+
+  public notificationUrlAppId: unknown;
+}
