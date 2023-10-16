@@ -19,8 +19,11 @@ export class Tasks extends BaseEntity {
   @Column('int', { name: 'list_id', nullable: true })
   public listId: number;
 
-  @Column('varchar', { name: 'ext_id', nullable: true, length: 255 })
+  @Column('varchar', { name: 'ext_id', nullable: true, length: 255, unique: true })
   public extId: string | null;
+
+  @Column('timestamp', { name: 'last_synced_at', nullable: true })
+  public lastSyncedAt: Date;
 
   @OneToOne(() => Lists, (lists) => lists.tasks, {
     onDelete: 'CASCADE',

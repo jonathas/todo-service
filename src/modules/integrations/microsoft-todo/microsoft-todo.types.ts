@@ -6,12 +6,18 @@ export enum TaskStatus {
   DEFERRED = 'deferred'
 }
 
+export enum WebhookChangeType {
+  CREATED = 'created',
+  UPDATED = 'updated',
+  DELETED = 'deleted'
+}
+
 export class UpdateMicrosoftTaskInput {
   public listId: string;
 
   public taskId: string;
 
-  public taskName: string;
+  public title?: string;
 
   public status: TaskStatus;
 }

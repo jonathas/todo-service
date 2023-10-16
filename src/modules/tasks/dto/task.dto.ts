@@ -16,7 +16,7 @@ export class Task {
   @Field(() => String)
   public name: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   public description: string;
 
   @Field(() => Boolean)

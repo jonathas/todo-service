@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Tasks } from './tasks.entity';
 import { PaginatedTasks } from './dto/task.dto';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTaskInput, TaskInput, UpdateTaskInput } from './dto/tasks.input';
 import { MicrosoftTodoService } from '../integrations/microsoft-todo/microsoft-todo.service';
@@ -50,6 +50,10 @@ export class TasksService {
     return task;
   }
 
+  public findOneByExtId(extId: string): Promise<Tasks> {
+    return this.tasksRepository.findOne({ where: { extId } });
+  }
+
   public async create(input: CreateTaskInput): Promise<Tasks> {
     const list = await this.listsService.findOne(input.listId);
 
@@ -61,6 +65,24 @@ export class TasksService {
     const task = await this.microsoftTodoService.createTask(extListId, input.name);
     return this.tasksRepository.save(
       this.tasksRepository.create(Object.assign(input, { extId: task.id }))
+    );
+  }
+
+  public async createFromExtId(
+    listIdFromDB: number,
+    extListId: string,
+    extId: string
+  ): Promise<Tasks> {
+    const { title, status } = await this.microsoftTodoService.getTask(extListId, extId);
+
+    return this.tasksRepository.save(
+      this.tasksRepository.create({
+        name: title,
+        isDone: status === TaskStatus.COMPLETED,
+        listId: listIdFromDB,
+        extId,
+        lastSyncedAt: new Date()
+      })
     );
   }
 
@@ -87,15 +109,37 @@ export class TasksService {
       return extId;
     }
 
-    const data: UpdateMicrosoftTaskInput = {
-      listId: extListId,
-      taskId: extId,
-      taskName: input.name,
-      status: input.isDone ? TaskStatus.COMPLETED : TaskStatus.NOT_STARTED
-    };
+    const data: UpdateMicrosoftTaskInput = Object.assign(
+      {
+        listId: extListId,
+        taskId: extId,
+        status: input.isDone ? TaskStatus.COMPLETED : TaskStatus.NOT_STARTED
+      },
+      input.name ? { title: input.name } : {}
+    );
     await this.microsoftTodoService.updateTask(data);
 
     return extId;
+  }
+
+  public async updateFromExtId(
+    taskFromDB: Tasks,
+    extListId: string,
+    extId: string
+  ): Promise<UpdateResult> {
+    const { title, status } = await this.microsoftTodoService.getTask(extListId, extId);
+    const listFromDB = await this.listsService.findOneByExtId(extListId);
+
+    return this.tasksRepository.update(
+      { id: taskFromDB.id },
+      {
+        listId: listFromDB.id,
+        extId,
+        lastSyncedAt: new Date(),
+        name: title,
+        isDone: status === TaskStatus.COMPLETED
+      }
+    );
   }
 
   public async delete(id: number): Promise<Tasks> {
@@ -109,5 +153,9 @@ export class TasksService {
     await this.tasksRepository.remove(task);
 
     return task;
+  }
+
+  public deleteByExtId(taskId: string): Promise<DeleteResult> {
+    return this.tasksRepository.delete({ extId: taskId });
   }
 }

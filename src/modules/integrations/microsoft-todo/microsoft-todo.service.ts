@@ -99,14 +99,15 @@ export class MicrosoftTodoService {
   }
 
   public updateTask(input: UpdateMicrosoftTaskInput): Promise<TaskOutput> {
-    const { listId, taskId, taskName } = input;
-    const data = {
-      title: taskName
-    };
+    const { listId, taskId, title, status } = input;
+    if (!title && !status) {
+      throw new Error('Missing required fields');
+    }
+
     return this.callAPI<TaskOutput>(
       `${this.baseUrl}/${listId}/tasks/${taskId}`,
       HttpMethod.PATCH,
-      data
+      Object.assign({}, title ? { title } : {}, status ? { status } : {})
     );
   }
 
@@ -142,6 +143,8 @@ export class MicrosoftTodoService {
       );
       subscriptions.push(res);
     }
+
+    // TODO: Handle subscription renewal
 
     return subscriptions;
   }

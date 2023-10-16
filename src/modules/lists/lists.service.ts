@@ -46,9 +46,20 @@ export class ListsService {
     return list;
   }
 
+  public findOneByExtId(extId: string): Promise<Lists> {
+    return this.listsRepository.findOne({ where: { extId } });
+  }
+
   public async create(input: CreateListInput): Promise<Lists> {
     const extId = (await this.microsoftTodoService.createList(input.name))?.id;
+    const extSubscriptionId = await this.createListSubscription(extId);
 
+    return this.listsRepository.save(
+      this.listsRepository.create(Object.assign(input, { extId, extSubscriptionId }))
+    );
+  }
+
+  private async createListSubscription(extId: string) {
     const { useWebhook, webhookUrl } = this.microsoftGraphConfig;
     let extSubscriptionId = '';
     if (useWebhook && webhookUrl) {
@@ -57,9 +68,20 @@ export class ListsService {
       await this.subscriptionsService.create(subResponse[0]);
     }
 
-    return this.listsRepository.save(
-      this.listsRepository.create(Object.assign(input, { extId, extSubscriptionId }))
-    );
+    return extSubscriptionId;
+  }
+
+  public async createFromExtId(extId: string, extSubscriptionId: string): Promise<Lists> {
+    const list = await this.microsoftTodoService.getList(extId);
+
+    const listInput: Partial<Lists> = {
+      name: list.displayName,
+      extId,
+      extSubscriptionId,
+      lastSyncedAt: new Date()
+    };
+
+    return this.listsRepository.save(this.listsRepository.create(listInput));
   }
 
   public async update(input: UpdateListInput): Promise<Lists> {

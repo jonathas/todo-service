@@ -1,4 +1,4 @@
-import { TaskStatus } from '../microsoft-todo.types';
+import { TaskStatus, WebhookChangeType } from '../microsoft-todo.types';
 
 export class TaskOutput {
   public importance: string;
@@ -73,4 +73,24 @@ export class SubscriptionResponse {
   public encryptionCertificateId: unknown;
 
   public notificationUrlAppId: unknown;
+}
+
+export class WebhookNotificationItem {
+  public tenantId: string;
+
+  public changeType: WebhookChangeType;
+
+  public subscriptionId: string;
+
+  public resource: string;
+
+  public clientState: unknown;
+
+  public resourceData: { id: string };
+
+  public subscriptionExpirationDateTime: string;
+}
+
+export class WebhookNotification {
+  public value: WebhookNotificationItem[];
 }
