@@ -1,10 +1,4 @@
-export enum TaskStatus {
-  NOT_STARTED = 'notStarted',
-  IN_PROGRESS = 'inProgress',
-  COMPLETED = 'completed',
-  WAITING_ON_OTHERS = 'waitingOnOthers',
-  DEFERRED = 'deferred'
-}
+import { TaskStatus } from '../microsoft-todo.types';
 
 export class TaskOutput {
   public importance: string;

@@ -6,6 +6,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTaskInput, TaskInput, UpdateTaskInput } from './dto/tasks.input';
 import { MicrosoftTodoService } from '../integrations/microsoft-todo/microsoft-todo.service';
 import { ListsService } from '../lists/lists.service';
+import {
+  TaskStatus,
+  UpdateMicrosoftTaskInput
+} from '../integrations/microsoft-todo/microsoft-todo.types';
 
 @Injectable()
 export class TasksService {
@@ -62,8 +66,15 @@ export class TasksService {
 
   public async update(input: UpdateTaskInput): Promise<Tasks> {
     const task = await this.findOne(input.id);
-    const { list } = task;
     task.updatedAt = new Date();
+
+    const extId = await this.syncUpdate(task, input);
+
+    return this.tasksRepository.save(Object.assign(task, input, { extId }));
+  }
+
+  private async syncUpdate(task: Tasks, input: UpdateTaskInput) {
+    const { list } = task;
 
     let extListId = list?.extId;
     if (!list?.extId) {
@@ -73,9 +84,18 @@ export class TasksService {
     let extId = task?.extId;
     if (!task?.extId) {
       extId = (await this.microsoftTodoService.createTask(extListId, input.name))?.id;
+      return extId;
     }
 
-    return this.tasksRepository.save(Object.assign(task, input, { extId }));
+    const data: UpdateMicrosoftTaskInput = {
+      listId: extListId,
+      taskId: extId,
+      taskName: input.name,
+      status: input.isDone ? TaskStatus.COMPLETED : TaskStatus.NOT_STARTED
+    };
+    await this.microsoftTodoService.updateTask(data);
+
+    return extId;
   }
 
   public async delete(id: number): Promise<Tasks> {

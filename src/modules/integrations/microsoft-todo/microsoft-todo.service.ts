@@ -4,6 +4,7 @@ import { MSIdentityService } from './ms-identity/ms-identity.service';
 import { ListOutput, ListsResponse, TaskOutput, TasksResponse } from './dto/microsoft-todo.output';
 import { HttpMethod } from '../../../shared/enums';
 import { UsersService } from '../../users/users.service';
+import { UpdateMicrosoftTaskInput } from './microsoft-todo.types';
 
 @Injectable()
 export class MicrosoftTodoService {
@@ -87,10 +88,16 @@ export class MicrosoftTodoService {
     });
   }
 
-  public updateTask(listId: string, taskId: string, taskName: string): Promise<TaskOutput> {
-    return this.callAPI<TaskOutput>(`${this.baseUrl}/${listId}/tasks/${taskId}`, HttpMethod.PATCH, {
+  public updateTask(input: UpdateMicrosoftTaskInput): Promise<TaskOutput> {
+    const { listId, taskId, taskName } = input;
+    const data = {
       title: taskName
-    });
+    };
+    return this.callAPI<TaskOutput>(
+      `${this.baseUrl}/${listId}/tasks/${taskId}`,
+      HttpMethod.PATCH,
+      data
+    );
   }
 
   public deleteTask(listId: string, taskId: string): Promise<TaskOutput> {
