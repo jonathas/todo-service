@@ -114,10 +114,16 @@ export class SyncService {
     );
 
     // Not in the API anymore, but still in the DB. Delete them.
-    const tasksToDelete = tasksFromDB.filter(
+    let tasksToDelete = tasksFromDB.filter(
       (taskDB) =>
         taskDB.extId !== '' && !tasksFromAPI.find((taskAPI) => taskAPI.id === taskDB.extId)
     );
+
+    if (tasksToDelete.length) {
+      const listFromDB = await this.listsService.findOneByExtId(listAPI.id);
+      tasksToDelete = tasksToDelete.filter((task) => task.listId === listFromDB.id);
+    }
+
     for (const taskDelete of tasksToDelete) {
       await this.tasksService.delete(taskDelete.id);
     }

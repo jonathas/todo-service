@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Lists } from './lists.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { MicrosoftGraphConfig } from '../../config/microsoft-graph.config';
 import { SubscriptionsService } from '../integrations/microsoft-todo/subscriptions/subscriptions.service';
 import { ListOutput } from '../integrations/microsoft-todo/dto/microsoft-todo.output';
+import { LoggerService } from '../../providers/logger/logger.service';
 
 @Injectable()
 export class ListsService {
@@ -22,8 +23,10 @@ export class ListsService {
     private readonly tasksRepository: Repository<Tasks>,
     private readonly microsoftTodoService: MicrosoftTodoService,
     private readonly subscriptionsService: SubscriptionsService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
+    private readonly logger: LoggerService
   ) {
+    this.logger.setContext(ListsService.name);
     this.microsoftGraphConfig = this.config.get<MicrosoftGraphConfig>('microsoftGraph');
   }
 
@@ -137,7 +140,13 @@ export class ListsService {
     const list = await this.findOne(id);
 
     if (list.extId) {
-      await this.microsoftTodoService.deleteList(list.extId);
+      await this.microsoftTodoService.deleteList(list.extId).catch((err) => {
+        if (err?.response?.data?.error?.code === 'ErrorItemNotFound') {
+          this.logger.info(`List with extId ${list.extId} not found in Microsoft Todo`);
+        } else {
+          throw new InternalServerErrorException(err?.response?.data?.error?.message);
+        }
+      });
 
       if (list?.extSubscriptionId) {
         await this.microsoftTodoService.unsubscribe([list.extSubscriptionId]);
