@@ -63,7 +63,7 @@ $ npm install
 $ ngrok http --domain=close-wrongly-jaybird.ngrok-free.app 3000
 ```
 
-Ps: Webhook is only one of the ways that our project synchronizes with the Microsoft To Do. The API should also work without it.
+Ps: Webhook is only one of the ways that our project synchronizes with the Microsoft To Do API. The API should also work without it.
 
 3) Run the containers for the DB and Redis (used for our GraphQL subscription)
 
