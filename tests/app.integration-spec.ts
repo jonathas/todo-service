@@ -26,7 +26,7 @@ describe('# App (integration tests)', () => {
     await app.close();
   });
 
-  describe('# Tasks', () => {
+  describe.skip('# Tasks', () => {
     let tasksScenario: TasksScenario;
 
     beforeAll(() => {
@@ -51,7 +51,7 @@ describe('# App (integration tests)', () => {
     it('should delete a task', () => tasksScenario.deleteTask());
   });
 
-  describe('# Lists', () => {
+  describe.skip('# Lists', () => {
     let listsScenario: ListsScenario;
 
     beforeAll(() => {

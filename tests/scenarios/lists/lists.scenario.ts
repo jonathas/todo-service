@@ -11,7 +11,7 @@ export default class ListsScenario {
     this.app = app;
   }
 
-  public async createLists() {
+  public async createLists(): Promise<number[]> {
     const groceries = {
       input: {
         name: 'Groceries',
@@ -19,7 +19,7 @@ export default class ListsScenario {
       }
     };
 
-    let id = 0;
+    const ids: number[] = [];
 
     await AppTestHelper.gqlRequest(this.app)
       .send({ query: ListsScenarioHelper.getCreateListMutation(), variables: groceries })
@@ -30,7 +30,7 @@ export default class ListsScenario {
         expect(body.data.createList.name).toBe(groceries.input.name);
         expect(body.data.createList.description).toBe(groceries.input.description);
 
-        id = body.data.createList.id;
+        ids.push(body.data.createList.id);
       });
 
     const shopping = {
@@ -42,9 +42,12 @@ export default class ListsScenario {
 
     await AppTestHelper.gqlRequest(this.app)
       .send({ query: ListsScenarioHelper.getCreateListMutation(), variables: shopping })
-      .expect(200);
+      .expect(200)
+      .expect(({ body }) => {
+        ids.push(body.data.createList.id);
+      });
 
-    return id;
+    return ids;
   }
 
   public async updateList() {
@@ -86,9 +89,10 @@ export default class ListsScenario {
   }
 
   public async getListById() {
-    const id = await this.createLists();
+    const listIds = await this.createLists();
+    const id = listIds[0];
     const tasksScenario = new TasksScenario(this.app);
-    await tasksScenario.createTasks(id);
+    await tasksScenario.createTasks(listIds);
 
     await AppTestHelper.gqlRequest(this.app)
       .send({ query: ListsScenarioHelper.getListByIdQuery(), variables: { id } })
@@ -103,9 +107,10 @@ export default class ListsScenario {
   }
 
   public async deleteList() {
-    const listId = await this.createLists();
+    const listIds = await this.createLists();
+    const listId = listIds[0];
     const tasksScenario = new TasksScenario(this.app);
-    const taskId = await tasksScenario.createTasks(listId);
+    const taskId = await tasksScenario.createTasks(listIds);
 
     await AppTestHelper.gqlRequest(this.app)
       .send({ query: ListsScenarioHelper.getDeleteListMutation(), variables: { id: listId } })

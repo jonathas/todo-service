@@ -120,6 +120,8 @@ export class ListsService {
     let extId = list?.extId;
     if (!list?.extId) {
       extId = (await this.microsoftTodoService.createList(input.name))?.id;
+    } else {
+      await this.microsoftTodoService.updateList(list.extId, input.name);
     }
 
     return this.listsRepository.save(Object.assign(list, input, { extId }));

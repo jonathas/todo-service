@@ -10,12 +10,16 @@ export default class TasksScenario {
     this.app = app;
   }
 
-  public async createTasks(listId?: number) {
+  public async createTasks(listIds?: number[]) {
+    const listsScenario = new ListsScenario(this.app);
+
+    listIds = listIds?.length ? listIds : await listsScenario.createLists();
+
     const variables = {
       input: {
         name: 'Sample task 1',
         description: 'This is a description',
-        listId: null
+        listId: listIds[0]
       }
     };
 
@@ -32,13 +36,8 @@ export default class TasksScenario {
 
     let id = 0;
 
-    if (!listId) {
-      const listsScenario = new ListsScenario(this.app);
-      listId = await listsScenario.createLists();
-    }
-
     variables.input.name = 'Sample task 2';
-    variables.input.listId = listId;
+    variables.input.listId = listIds[1];
 
     await AppTestHelper.gqlRequest(this.app)
       .send({ query: TasksScenarioHelper.getCreateTaskMutation(), variables })

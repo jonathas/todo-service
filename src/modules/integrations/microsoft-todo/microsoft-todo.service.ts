@@ -13,6 +13,10 @@ import { UsersService } from '../../users/users.service';
 import { UpdateMicrosoftTaskInput } from './microsoft-todo.types';
 import * as dayjs from 'dayjs';
 
+/**
+ * Microsoft To Do API service.
+ * @see https://learn.microsoft.com/en-us/graph/api/resources/todo-overview?view=graph-rest-1.0
+ */
 @Injectable()
 export class MicrosoftTodoService {
   private baseUrl: string;
@@ -122,6 +126,7 @@ export class MicrosoftTodoService {
    * Subscribe to Microsoft Graph API webhook notifications.
    * Expiration DateTime (Maximum length of subscription):
    * @see https://tinyurl.com/y6drzxrn
+   * @see https://tinyurl.com/yc7f4rh2
    */
   public async subscribe(listIds: string[], webhookUrl: string) {
     if (!listIds.length) {

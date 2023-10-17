@@ -65,7 +65,7 @@ $ ngrok http --domain=close-wrongly-jaybird.ngrok-free.app 3000
 
 Ps: Webhook is only one of the ways that our project synchronizes with the Microsoft To Do. The API should also work without it.
 
-3) Run the containers for the DB and Redis
+3) Run the containers for the DB and Redis (used for our GraphQL subscription)
 
 ```bash
 $ docker compose -f ./resources/docker-compose.yml up
