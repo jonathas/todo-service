@@ -235,7 +235,7 @@ This will generate a directory called "documentation" with several files, so you
 
 ## Postman collection
 
-A [Postman](https://www.postman.com/downloads/) collection can be found inside of the docs directory. You can just import it to Postman and start using it with the API.
+A [Postman](https://www.postman.com/downloads/) collection can be found inside of the docs directory. You can just import it to Postman and start using it to interact with the API.
 
 ## GraphQL Playground
 
