@@ -402,3 +402,6 @@ resources/db/data
 
 # GraphQL Schema (Auto-generated when the project runs)
 schema.gql
+
+# Compodoc generated
+documentation
