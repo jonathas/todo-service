@@ -73,7 +73,7 @@ $ docker compose -f ./resources/docker-compose.yml up
 
 This command will automatically create the DB and required tables.
 
-4) Run the API with one of the following commands
+4) Run the API with one of the following commands (debug preferred)
 
 ```bash
 # development
@@ -91,7 +91,7 @@ $ npm run start:prod
 
 ## Configuring the integration with the Microsoft To Do API
 
-Since there's no client-side part connecting to our yet, the OAuth flow has been simplified without any page interaction.
+Since there's no client-side part connecting to our API yet, the OAuth flow has been simplified without any page interaction.
 
 After running the API successfully with the correct .env values:
 
