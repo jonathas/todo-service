@@ -187,7 +187,7 @@ erDiagram
 
 ## Synchronization
 
-Our API synchronizes with the Microsoft To Do API in 3 ways
+Our API synchronizes with the Microsoft To Do API in 3 ways: Webhook, manually and via a cron job
 
 ### Webhook
 
